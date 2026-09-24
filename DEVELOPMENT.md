@@ -37,11 +37,12 @@ Issue
   -> 指摘あり
        -> branch修正
        -> AI REVIEW再実行
-  -> AI REVIEW PASS
+  -> AI REVIEW PASS（reviewed HEAD / base SHAをPRへ記録）
+  -> reviewed HEADが変わっていないことを確認
   -> required Actions / CI確認
   -> merge
   -> main後検証
-  -> shared SAHOU cacheのrevision更新
+  -> shared SAHOU cache利用環境ではrevision更新
 ```
 
 GitHub API / connectorを使って同一branchへ複数回修正してよい。push方法そのものはreview品質の代替条件ではない。
@@ -84,6 +85,15 @@ review結果は最低限次のいずれかとする。
 
 - `PASS`
 - `CHANGES_REQUIRED`
+
+review結果はPRへ記録し、少なくとも次を含める。
+
+- result
+- reviewed PR head SHA
+- reviewed base SHA
+- review時点の主要findingまたは `no blocking findings`
+
+`PASS` は記録された **exact PR head SHA + base SHA** にだけ有効とする。PASS後にPR headが変わった場合、変更量にかかわらず旧PASSをmerge根拠に使わず、AI reviewを再実行する。
 
 `CHANGES_REQUIRED` の場合は、mergeせず修正する。修正後は差分だけを眺めて済ませず、影響範囲に応じてAI reviewを再実行する。
 
