@@ -232,8 +232,8 @@ def self_test() -> int:
         "token=" + "github_pat_" + "B" * 32,
         "token=" + "sk-" + "C" * 32,
         "key=" + "AKIA" + "D" * 16,
-        "ingredient: synthetic-ingredient 2.5%",
-        "配合量 15 mg/mL",
+        "ingredient: synthetic-ingredient " + "2.5" + "%",
+        "配合量 " + "15" + " mg/mL",
     ]
     good = [
         "/Users/user/project",
@@ -257,12 +257,12 @@ def self_test() -> int:
         ("PRODUCT", normalize_text("Synthetic Product Z"), compact_text("Synthetic Product Z")),
         ("INGREDIENT", normalize_text("Synthetic Ingredient Q"), compact_text("Synthetic Ingredient Q")),
     ]
-    private, ingredient_hit = private_line_findings("synthetic ingredient q 3.0%", rules)
+    private, ingredient_hit = private_line_findings("synthetic ingredient q " + "3.0" + "%", rules)
     if "PRIVATE_INGREDIENT" not in private or not ingredient_hit:
         print("Self-test failed: ingredient rule was not detected.")
         return 1
 
-    lines = ["Synthetic Ingredient Q", "3.0 mg/mL"]
+    lines = ["Synthetic Ingredient Q", "3.0" + " mg/mL"]
     hits = []
     for i, line in enumerate(lines):
         pf, ih = private_line_findings(line, rules)
