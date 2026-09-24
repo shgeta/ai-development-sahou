@@ -361,9 +361,12 @@ Optional:
 - FOUND_SOURCE_ID
 - LOCATOR_URL_OR_REF
 - LICENSE
+- RIGHTS_STATUS = VERIFIED_OPEN | VERIFIED_AUTHORIZED | UNKNOWN | RESTRICTED
 - NOTE
 
 If an alternate manuscript/preprint is found and has materially distinct content/version identity, create a SOURCE for it and set FOUND_SOURCE_ID.
+
+A publicly reachable third-party copy with `RIGHTS_STATUS = UNKNOWN` MAY establish that content was technically inspected, but it MUST NOT by itself satisfy a policy requiring a legitimate/open full-text route. Access availability and rights/authorization are separate semantics.
 
 ### 13.3 Access location vs SOURCE identity
 
