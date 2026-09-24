@@ -86,6 +86,12 @@ shared cacheはSAHOUのauthorityではありません。authorityはGitHub repos
 
 `SAHOU_FULL.md` のような派生統合fileは作りません。cacheはexact repository snapshotそのものを保持します。
 
+## SAHOU自体の開発
+
+このrepository自体を修正・保守する場合は、利用者向け共通仕様とは別に [SAHOU Development Guide](DEVELOPMENT.md) を使用します。
+
+PR merge前にAI reviewを行い、Issue / PR diff / base側関連仕様 / 周辺文脈を再確認した上で、Actions / CIとあわせて検証します。
+
 ## ライセンス
 
 MIT License
