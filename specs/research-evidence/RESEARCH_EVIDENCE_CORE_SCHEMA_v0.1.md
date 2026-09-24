@@ -300,7 +300,31 @@ Validate at least:
 - field absence is not auto-converted to UNKNOWN/false
 - publication/source count is not silently treated as independent evidence count
 
-## 13. Boundary with AISPEC
+## 13. Boundary with Research Core and Analytics
+
+Research Evidence Core is the evidence/provenance model used by the broader Research Core.
+
+An analytic operation is normally represented as an `ACTIVITY` when its execution or reproducibility matters.
+
+Typical analytic relations:
+
+- ACTIVITY USES SOURCE
+- ACTIVITY USES ENTITY
+- ACTIVITY USES OBSERVATION
+- ACTIVITY GENERATES OBSERVATION
+- ASSESSMENT EVALUATES OBSERVATION
+- ASSESSMENT SUPPORTS PROPOSITION
+- ASSESSMENT CONTRADICTS PROPOSITION
+
+Examples include data analysis, statistical analysis, code analysis, log analysis, visual comparison, computational analysis, and other method-specific analysis.
+
+Core does not require a separate ANALYTICS semantic TYPE.
+
+A domain or method Plugin MAY add analytic ACTIVITY subtypes, method fields, validation rules, and closure rules when repeated structured semantics justify them.
+
+Raw analytic output MUST NOT be silently upgraded into a true PROPOSITION or SUPPORT assessment.
+
+## 14. Boundary with AISPEC
 
 Research Evidence Core:
 - represents evidence and evidence interpretation.
@@ -310,7 +334,7 @@ AISPEC:
 
 Evidence may support AISPEC through explicit provenance, but Research Evidence does not become AISPEC merely because a proposition is well supported.
 
-## 14. Boundary with Work Item Tracker and Adapters
+## 15. Boundary with Work Item Tracker and Adapters
 
 Work Item Tracker:
 - search path
