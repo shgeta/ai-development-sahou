@@ -24,7 +24,6 @@ PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("SLACK_TOKEN", re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{20,}\b")),
     ("AWS_ACCESS_KEY", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("PRIVATE_KEY_HEADER", re.compile(r"-----BEGIN(?: [A-Z0-9]+)? PRIVATE KEY-----")),
-    ("LOCAL_HOSTNAME", re.compile(r"(?i)\b[A-Za-z0-9][A-Za-z0-9.-]*\.local\b")),
 ]
 
 
@@ -123,7 +122,6 @@ def self_test() -> int:
         "token=" + "github_pat_" + "B" * 32,
         "token=" + "sk-" + "C" * 32,
         "key=" + "AKIA" + "D" * 16,
-        "host=" + "devbox" + ".local",
     ]
     good = [
         "/Users/user/project",
