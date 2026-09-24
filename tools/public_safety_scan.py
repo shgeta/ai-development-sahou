@@ -12,6 +12,16 @@ import subprocess
 ALLOW_MARKER = "public-safety: allow"
 SAFE_EMAIL_DOMAINS = {"example.com", "example.org", "example.net", "users.noreply.github.com"}
 SAFE_HOME_NAMES = {"user", "username", "example", "runner"}
+MAX_TRACKED_FILE_BYTES = 2 * 1024 * 1024
+
+BLOCKED_EXTENSIONS = {
+    ".fig", ".sketch", ".psd", ".psb", ".ai", ".xd",
+    ".zip", ".7z", ".rar", ".tar", ".tgz", ".gz", ".bz2", ".xz",
+    ".db", ".sqlite", ".sqlite3", ".dump", ".bak", ".tmp",
+    ".pem", ".key", ".p12", ".pfx", ".mobileprovision",
+}
+BLOCKED_FILENAMES = {".env", ".ds_store", "thumbs.db"}
+BLOCKED_PATH_PARTS = {".idea", ".vscode"}
 
 PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("LOCAL_HOME_POSIX", re.compile(r"/(?:Users|home)/(?P<name>[A-Za-z0-9._-]{2,})/")),
@@ -72,20 +82,43 @@ def scan_line(line: str, terms: list[str]) -> list[str]:
     return findings
 
 
+def file_policy_findings(path: Path, data: bytes) -> list[str]:
+    findings: list[str] = []
+    suffix = path.suffix.casefold()
+    name = path.name.casefold()
+    parts = {part.casefold() for part in path.parts}
+
+    if suffix in BLOCKED_EXTENSIONS:
+        findings.append("BLOCKED_FILE_TYPE")
+    if name in BLOCKED_FILENAMES or (name.startswith(".env.") and name != ".env.example"):
+        findings.append("LOCAL_ONLY_FILE")
+    if parts & BLOCKED_PATH_PARTS:
+        findings.append("LOCAL_ONLY_PATH")
+    if len(data) > MAX_TRACKED_FILE_BYTES:
+        findings.append("TRACKED_FILE_TOO_LARGE")
+
+    if b"\0" in data:
+        findings.append("BINARY_FILE")
+    else:
+        try:
+            data.decode("utf-8")
+        except UnicodeDecodeError:
+            findings.append("BINARY_FILE")
+
+    return findings
+
+
 def scan_file(path: Path, terms: list[str]) -> list[tuple[int, str]]:
     try:
         data = path.read_bytes()
     except OSError as exc:
         return [(0, f"READ_ERROR:{exc.__class__.__name__}")]
 
-    if b"\0" in data:
-        return []
+    policy_findings = file_policy_findings(path, data)
+    if policy_findings:
+        return [(0, category) for category in policy_findings]
 
-    try:
-        text = data.decode("utf-8")
-    except UnicodeDecodeError:
-        return []
-
+    text = data.decode("utf-8")
     findings: list[tuple[int, str]] = []
     for line_no, line in enumerate(text.splitlines(), start=1):
         for category in scan_line(line, terms):
@@ -140,6 +173,23 @@ def self_test() -> int:
         if scan_line(sample, []):
             print("Self-test failed: expected good sample to pass.")
             return 1
+
+    file_cases = [
+        (Path("design.fig"), b"synthetic", "BLOCKED_FILE_TYPE"),
+        (Path("archive.zip"), b"synthetic", "BLOCKED_FILE_TYPE"),
+        (Path(".env"), b"X=1", "LOCAL_ONLY_FILE"),
+        (Path(".vscode/settings.json"), b"{}", "LOCAL_ONLY_PATH"),
+        (Path("asset.bin"), b"\x00synthetic", "BINARY_FILE"),
+        (Path("huge.txt"), b"x" * (MAX_TRACKED_FILE_BYTES + 1), "TRACKED_FILE_TOO_LARGE"),
+    ]
+    for path, data, category in file_cases:
+        if category not in file_policy_findings(path, data):
+            print(f"Self-test failed: {category} was not detected.")
+            return 1
+
+    if file_policy_findings(Path("docs/example.md"), b"# safe text\n"):
+        print("Self-test failed: normal UTF-8 text should pass file policy.")
+        return 1
 
     deny = "private-project-codename"
     if "PRIVATE_DENYLIST_TERM" not in scan_line("contains " + deny, [deny]):
