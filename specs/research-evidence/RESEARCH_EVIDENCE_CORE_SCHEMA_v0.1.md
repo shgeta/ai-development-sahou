@@ -60,6 +60,19 @@ Fields such as the following are NOT Core requirements:
 A Plugin may require some of these for its own domain.
 An Adapter may add audit, persistence, indexing, display, or workflow metadata.
 
+### 3.1 NOTE / free-form fallback
+
+A Plugin or Adapter MAY provide a free-form `NOTE` / remarks field as an escape hatch for uncommon detail.
+
+The governing rule is:
+
+- if information is needed for search, comparison, closure resolution, identity, validation, or a decision, it SHOULD be represented by an explicit field / relation / assessment;
+- if information is only explanatory or incidental, it MAY remain in NOTE;
+- a record MUST remain correctly interpretable when NOTE is ignored;
+- repeated use of the same semantic pattern in NOTE is a schema-evolution signal and SHOULD trigger review for promotion into a structured field, relation, controlled vocabulary, or assessment type.
+
+Core does not require NOTE and does not assign semantic authority to free-form remarks.
+
 ## 4. Core semantic types
 
 ### 4.1 ENTITY
