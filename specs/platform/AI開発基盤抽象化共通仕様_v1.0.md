@@ -79,3 +79,20 @@ Adapterは少なくとも以下を宣言する。
 - 製品固有名を使用する場合、Adapterまたは明示的なimplementation exampleとして区別されている。
 - capability非搭載環境で、存在しない機能を使用する前提になっていない。
 - Adapterを差し替えても、AISPEC / Issue相当 / Current State / exact revision / validation evidence の役割分離が保たれる。
+
+## 7. Shared exact-revision cache
+
+複数project / 複数chatから共通して参照される外部authorityは、projectごとに重複保存せず、**authority identity + exact revision** をkeyとするshared cacheへ保存してよい。
+
+運用原則:
+
+1. shared cacheはauthorityそのものではなくread optimizationである。
+2. cache identityは少なくとも `authority repository identity + exact revision SHA` で一意に決める。
+3. session開始時は、まずauthority側のcurrent refからexact revisionを解決する。
+4. shared cacheに同一exact revisionの検証済みsnapshotが存在する場合、そのsnapshotを再利用し、authority本文を再取得しない。
+5. current exact revisionがcacheと異なる場合のみ、新しいexact snapshotを取得してcacheを更新する。
+6. cache snapshotはpartial bundle、手作業要約、派生full-file等へ置換せず、対象authorityのexact repository snapshotを基本とする。
+7. stale / partial / revision不明 / 検証不能なcacheをcurrent authorityの代替として使用しない。
+8. project固有Current State、Issue state、private input等と、全project共有cacheを同一namespaceへ混在させない。
+
+このruleは、共通authorityを毎session full利用しながら、本文の再取得だけを省略するためのものである。
