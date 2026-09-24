@@ -1,0 +1,112 @@
+name: SAHOU exact snapshot
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    name: Build exact repository snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p snapshot
+
+          git archive --format=tar.gz --prefix=ai-development-sahou/ \
+            -o snapshot/repository.tar.gz HEAD
+
+          git ls-tree -r --full-tree HEAD > snapshot/TREE_GIT.txt
+
+          git ls-files -z \
+            | xargs -0 sha256sum \
+            > snapshot/FILES_SHA256.txt
+
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import subprocess
+          from pathlib import Path
+
+          def sha256(path: str) -> str:
+              h = hashlib.sha256()
+              with open(path, "rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          commit_sha = subprocess.check_output(
+              ["git", "rev-parse", "HEAD"], text=True
+          ).strip()
+          tree_sha = subprocess.check_output(
+              ["git", "rev-parse", "HEAD^{tree}"], text=True
+          ).strip()
+
+          manifest = {
+              "schema": "sahou-exact-snapshot-v1",
+              "repository": "shgeta/ai-development-sahou",
+              "source_ref": "main",
+              "commit_sha": commit_sha,
+              "git_tree_sha": tree_sha,
+              "archive": "repository.tar.gz",
+              "archive_sha256": sha256("snapshot/repository.tar.gz"),
+              "git_tree_manifest": "TREE_GIT.txt",
+              "git_tree_manifest_sha256": sha256("snapshot/TREE_GIT.txt"),
+              "files_manifest": "FILES_SHA256.txt",
+              "files_manifest_sha256": sha256("snapshot/FILES_SHA256.txt"),
+          }
+          Path("snapshot/MANIFEST.json").write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Verify snapshot metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          def sha256(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          base = Path("snapshot")
+          manifest = json.loads((base / "MANIFEST.json").read_text(encoding="utf-8"))
+
+          checks = {
+              "archive_sha256": base / manifest["archive"],
+              "git_tree_manifest_sha256": base / manifest["git_tree_manifest"],
+              "files_manifest_sha256": base / manifest["files_manifest"],
+          }
+          for key, path in checks.items():
+              if sha256(path) != manifest[key]:
+                  raise SystemExit(f"{key} mismatch")
+          print("Exact snapshot metadata verified.")
+          PY
+
+      - name: Upload exact snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: sahou-exact-snapshot-${{ github.sha }}
+          path: snapshot/
+          if-no-files-found: error
+          retention-days: 30
