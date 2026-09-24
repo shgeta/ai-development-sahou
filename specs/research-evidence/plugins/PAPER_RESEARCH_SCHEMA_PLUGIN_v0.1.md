@@ -487,7 +487,27 @@ PROPOSITION
 
 Do not automatically load every author, affiliation, citation, or access check when it is irrelevant to the current evidence question.
 
-## 20. Validation
+## 20. NOTE / remarks policy
+
+Paper Plugin MAY use free-form NOTE fields for irregular details that do not affect evidence semantics.
+
+Examples appropriate for NOTE:
+- unusual formatting or OCR/display quirks,
+- incidental retrieval comments,
+- one-off contextual detail that does not affect identity, closure, comparison, or assessment.
+
+Examples that MUST NOT exist only in NOTE when they matter to the task:
+- a free full-text route that changes access sufficiency,
+- suspected cohort overlap or publication duplication,
+- a source location required to verify an extracted result,
+- a version mismatch,
+- a reason a source is included/excluded,
+- a fact needed to determine purchase necessity.
+
+Promotion rule:
+when the same kind of information repeatedly appears in NOTE and is being used for search, filtering, comparison, closure, validation, or decisions, treat that repetition as evidence that the concept should be promoted into a structured Paper Plugin field/relation/assessment in a schema-evolution change.
+
+## 21. Validation
 
 Validate at least:
 - multiple identifiers may map to one SOURCE
@@ -505,7 +525,7 @@ Validate at least:
 - search "no result" statements remain bounded by search activity/date/query
 - paper-specific fields do not require clinical/toxicology/chemistry semantics
 
-## 21. Compatibility
+## 22. Compatibility
 
 Paper Plugin may coexist with domain plugins such as:
 - Clinical Research
