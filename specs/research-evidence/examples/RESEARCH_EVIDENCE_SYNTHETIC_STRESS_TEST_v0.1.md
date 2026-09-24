@@ -224,3 +224,100 @@ The schema fails if it:
 5. counts Thesis Gamma and Paper Beta as independent evidence without lineage assessment,
 6. requires purchase before free-route closure,
 7. cannot resolve Q.001 without loading the entire evidence graph.
+
+
+## 12. Non-literature analytics stress test
+
+A synthetic repository also contains:
+- dataset `Dataset-X`,
+- application log `Log-Y`,
+- implementation source `Code-Z`,
+- two rendered images `Visual-Before` and `Visual-After`.
+
+Research question:
+
+`Q.002` — Does the implementation change alter Output-M under Condition-N?
+
+### 12.1 SOURCE / ENTITY
+
+- `S.DATA.001` = Dataset-X
+- `S.LOG.001` = Log-Y
+- `S.CODE.001` = Code-Z
+- `S.VIS.001` = Visual-Before
+- `S.VIS.002` = Visual-After
+
+These are retrievable SOURCE records when their exact content/version matters.
+
+### 12.2 Analytic ACTIVITY
+
+`A.ANALYTICS.001`
+TYPE: ACTIVITY
+SUBTYPE: DATA_ANALYSIS
+USES: S.DATA.001
+GENERATES: O.DATA.001
+
+`A.ANALYTICS.002`
+TYPE: ACTIVITY
+SUBTYPE: LOG_ANALYSIS
+USES: S.LOG.001
+GENERATES: O.LOG.001
+
+`A.ANALYTICS.003`
+TYPE: ACTIVITY
+SUBTYPE: CODE_ANALYSIS
+USES: S.CODE.001
+GENERATES: O.CODE.001
+
+`A.ANALYTICS.004`
+TYPE: ACTIVITY
+SUBTYPE: VISUAL_COMPARISON
+USES: S.VIS.001, S.VIS.002
+GENERATES: O.VIS.001
+
+Expected behavior:
+- Analytics uses the existing ACTIVITY semantic type.
+- DATA_ANALYSIS / LOG_ANALYSIS / CODE_ANALYSIS / VISUAL_COMPARISON may be Plugin-defined subtypes.
+- No separate ANALYTICS Core TYPE is required.
+
+### 12.3 OBSERVATION vs interpretation
+
+Example observations:
+
+- `O.DATA.001`: metric M changed from synthetic value A to B under the recorded comparison.
+- `O.LOG.001`: event E appears only after the implementation change.
+- `O.CODE.001`: branch condition C changed in the compared revision.
+- `O.VIS.001`: rendered region R differs above the configured comparison threshold.
+
+None of these observations automatically proves:
+
+`P.003` — The implementation change is the cause of Output-M change under Condition-N.
+
+Causal/support interpretation belongs in ASSESSMENT.
+
+### 12.4 Mixed research closure
+
+Expected closure for `Q.002` may combine:
+
+```text
+Q.002
+ -> P.003
+ -> causal/support ASSESSMENT
+ -> O.DATA.001
+ -> O.LOG.001
+ -> O.CODE.001
+ -> O.VIS.001
+ -> A.ANALYTICS.001..004
+ -> exact SOURCE revisions
+ -> literature SOURCE only if external evidence is needed
+```
+
+This verifies that one research question may combine analytics and literature without creating separate top-level research systems.
+
+### 12.5 Failure conditions
+
+The schema fails if it:
+1. requires a separate Analysis Core to represent these activities,
+2. stores interpretation only as raw observation text,
+3. treats an analytic output as automatically proving a proposition,
+4. cannot combine paper evidence and empirical analytics in one closure,
+5. treats every data/code/log/image field as universal Research Core columns.
