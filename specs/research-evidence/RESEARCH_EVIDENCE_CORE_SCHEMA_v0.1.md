@@ -2,173 +2,139 @@
 
 - Updated: 2026-09-24
 - Status: CANDIDATE
-- Scope: scientific / technical / regulatory / safety / market research evidence
-- Relation to AISPEC: sibling semantic model. AISPEC defines current normative meaning; Research Evidence Core defines evidence/provenance structures that may support that meaning.
+- Scope: domain-independent evidence semantics
+- Relation to AISPEC: sibling semantic model. AISPEC defines current normative meaning; Research Evidence Core defines minimal evidence/provenance semantics that may support that meaning.
 - Decision history: ai-development-sahou Issue #17
 
 ## 1. Purpose
 
-Research Evidence Core is a logical evidence database model for preserving:
-- what source exists,
-- what activity was performed,
-- what was observed,
-- what proposition is being evaluated,
-- what question defines the research scope,
-- and how evidence is assessed.
+Research Evidence Core is a deliberately small logical evidence model.
 
-The Core MUST NOT encode domain-specific fields merely because one investigation needs them.
-Clinical, paper-specific, analytical chemistry, toxicology, regulatory, or other domain details belong in Schema Plugins.
+It defines only:
+- reusable identities,
+- information sources,
+- evidence-producing activities,
+- observations,
+- propositions,
+- research questions,
+- assessments,
+- and typed relations between them.
 
-## 2. Core design principles
+Anything specific to papers, clinical research, toxicology, chemistry, regulation, vehicles, products, patents, storage, UI, audit timestamps, indexing, or workflow belongs in a Plugin / Profile / Adapter unless it is proven to be universally semantic.
 
-1. Meaning MUST NOT depend on physical file, folder, row order, Markdown heading, or shard location.
+## 2. Core principles
+
+1. Meaning MUST NOT depend on physical file, folder, row order, Markdown structure, or shard location.
 2. Every semantic record MUST have a stable logical ID.
-3. Source assertions, observations, and internal assessments MUST remain distinguishable.
+3. Source assertion, observation, and assessment MUST remain distinguishable.
 4. UNKNOWN MUST NOT be collapsed into false, absent, not measured, not reported, or not retrieved.
-5. Search starts from a seed record and resolves only the required evidence closure.
+5. Retrieval uses SEARCH -> seed -> required closure, not whole-database loading.
 6. Physical shards are storage partitions, not semantic boundaries.
-7. Existing-record changes are PATCH-like semantic updates; large representation changes are MIGRATION.
-8. Schema field absence is distinct from an epistemic value of UNKNOWN.
-9. Domain plugins MAY extend fields, relation vocabulary, validation, and closure rules, but MUST NOT silently redefine Core semantics.
-10. Decision/search history belongs in the Work Item Tracker; exact representation changes belong in the versioned repository.
+7. Field absence is schema-layer absence, not an epistemic value.
+8. Plugins MAY extend Core but MUST NOT silently redefine Core semantics.
+9. Operational convenience fields MUST NOT be promoted into Core merely because an implementation finds them useful.
+10. Work history and implementation history remain outside the evidence semantics.
 
-## 3. Core semantic record types
+## 3. Minimal common record shape
 
-### 3.1 ENTITY
+Every semantic record requires only:
+
+- `ID`
+- `TYPE`
+
+No other field is universally required by Core.
+
+Fields such as the following are NOT Core requirements:
+- TITLE
+- DESCRIPTION
+- STATUS
+- CREATED_AT
+- UPDATED_AT
+- SOURCE_REF
+- DECISION_REF
+- TAGS
+- owner / author / user
+- file path
+- storage location
+
+A Plugin may require some of these for its own domain.
+An Adapter may add audit, persistence, indexing, display, or workflow metadata.
+
+## 4. Core semantic types
+
+### 4.1 ENTITY
 
 Reusable identity referenced by other records.
 
-Examples:
-- substance
-- product
-- person
-- organization
-- population
-- specimen
-- method
-- device
-- dataset
-- jurisdiction
+Identity boundary:
+create a new ENTITY only when the real-world or conceptual referent changes.
 
-ENTITY is for identity reuse, not for arbitrary attributes that never need cross-record reference.
+Alias, spelling, language, identifier, or display-name changes alone do not create a new ENTITY.
+
+### 4.2 SOURCE
+
+A retrievable information-bearing object.
 
 Identity boundary:
-Create a new ENTITY when the real-world referent changes.
-Alias, spelling, language, identifier, or display-name changes alone MUST NOT create a new ENTITY.
+create a new SOURCE when the citable/versioned information object changes materially.
 
-### 3.2 SOURCE
+Different manifestations or versions may be connected explicitly rather than treated as unrelated sources.
 
-A retrievable information-bearing source.
+### 4.3 ACTIVITY
 
-Examples:
-- journal article
-- conference abstract
-- thesis
-- dataset
-- official regulation
-- SDS
-- database record
-- web page
-- report
+An action or process that uses, transforms, searches, analyzes, or generates evidence.
 
 Identity boundary:
-Create a new SOURCE when the citable/versioned information object changes materially.
-Different manifestations of the same intellectual work MAY be linked as versions/expressions rather than duplicated as unrelated sources.
+create a new ACTIVITY when the execution/reproducibility unit materially changes.
 
-### 3.3 ACTIVITY
+### 4.4 OBSERVATION
 
-An action/process that uses or generates evidence.
-
-Examples:
-- experiment
-- clinical trial
-- assay
-- analysis
-- systematic review
-- search
-- evidence extraction
-- source access check
+An atomic observed or derived result.
 
 Identity boundary:
-Create a new ACTIVITY when protocol, execution unit, cohort/sample set, analytic operation, or reproducibility boundary changes enough that results should not be treated as one execution unit.
+create a new OBSERVATION when a change in endpoint, comparison, timepoint, sample/population stratum, analysis set, or value makes separate citation or assessment useful.
 
-### 3.4 OBSERVATION
+OBSERVATION does not itself mean that a proposition is supported.
 
-An atomic observed or derived result generated by an ACTIVITY.
+### 4.5 PROPOSITION
 
-Examples:
-- measured concentration
-- effect estimate
-- p-value
-- qualitative finding
-- chromatographic peak
-- assay response
-- null result
+A truth-evaluable statement whose evidential support may change.
 
 Identity boundary:
-Create a new OBSERVATION when endpoint, comparison, timepoint, population/sample stratum, analysis set, or reported value changes such that independent citation/evaluation is useful.
+create a new PROPOSITION when its truth conditions materially change.
 
-A compound sentence containing multiple independently evaluable results SHOULD be split into multiple OBSERVATION records.
+A source statement is not automatically a true proposition, and a proposition is not automatically an observation.
 
-### 3.5 PROPOSITION
+### 4.6 QUESTION
 
-A truth-evaluable statement whose support can change as evidence changes.
-
-Examples:
-- compound X increases endpoint Y
-- no direct human-skin metabolism study has been identified
-- source A reports result B
+A research question that can act as a retrieval/closure seed.
 
 Identity boundary:
-Create a new PROPOSITION when changing its truth conditions would change what evidence is relevant to it.
+create a new QUESTION when its scope changes enough to change the relevant evidence set.
 
-PROPOSITION MUST NOT be used merely as a copy of source text when no evidence evaluation is needed.
+### 4.7 ASSESSMENT
 
-### 3.6 QUESTION
+An explicit evaluative judgment about one or more records or relations.
 
-A research question or scope seed that defines what evidence closure is being requested.
-
-Examples:
-- Does compound X generate metabolite Y in human skin after topical use?
-- Is intervention A more effective than comparator B for outcome C?
+Examples may include support, contradiction, bias, independence, directness, applicability, duplication, authority, certainty, or evidence gap.
 
 Identity boundary:
-Create a new QUESTION when a change to target population, intervention/exposure, comparator, outcome, jurisdiction, time window, or other scope condition changes the relevant evidence set.
+create a new ASSESSMENT when target, assessor, criterion/framework, evidence basis, or judgment materially changes.
 
-### 3.7 ASSESSMENT
+Assessment semantics MUST NOT be silently embedded into an OBSERVATION.
 
-An explicit evaluative judgment about one or more records.
+## 5. Graph primitive: RELATION
 
-Examples:
-- supports / contradicts / does not address
-- risk of bias
-- independence
-- directness
-- applicability
-- authority
-- duplication / cohort overlap
-- evidence gap
-- certainty
+RELATION connects semantic records.
 
-Identity boundary:
-Create a new ASSESSMENT when assessor, target, criterion/framework, evidence basis, or judgment changes materially.
+Minimum shape:
+- `SUBJECT_ID`
+- `PREDICATE`
+- `OBJECT_ID`
 
-Raw observations MUST NOT silently embed assessment semantics such as "high quality", "independent", or "proves".
+That is the entire Core relation requirement.
 
-## 4. Graph primitive: RELATION
-
-RELATION is a graph primitive, not necessarily a semantic record type.
-
-Minimum fields:
-- SUBJECT_ID
-- PREDICATE
-- OBJECT_ID
-
-Optional qualifiers:
-- QUALIFIER
-- VALID_FROM / VALID_TO
-- SOURCE_REF
-- NOTE
+Qualifiers, provenance, timing, confidence, source location, and relation-specific metadata belong in Plugins or qualified ASSESSMENT structures when needed.
 
 Core relation examples:
 - SOURCE REPORTS ACTIVITY
@@ -177,193 +143,161 @@ Core relation examples:
 - ACTIVITY GENERATES OBSERVATION
 - OBSERVATION ABOUT ENTITY
 - QUESTION TARGETS PROPOSITION
-- ASSESSMENT EVALUATES SOURCE|ACTIVITY|OBSERVATION|PROPOSITION|QUESTION|ENTITY
+- ASSESSMENT EVALUATES <record>
 - ASSESSMENT SUPPORTS PROPOSITION
 - ASSESSMENT CONTRADICTS PROPOSITION
 - SOURCE VERSION_OF SOURCE
-- SOURCE CORRECTS SOURCE
-- SOURCE RETRACTS SOURCE
 
-A relation that itself requires provenance, conflicting judgments, timing, or repeated evaluation SHOULD be represented through an ASSESSMENT or qualified relation record rather than an unqualified edge.
+Core defines relation semantics, not storage syntax.
 
-## 5. Common record fields
+## 6. Epistemic distinctions
 
-Required for all semantic records:
-- ID
-- TYPE
-- TITLE
-- STATUS
-- CREATED_AT
-- UPDATED_AT
+Core defines these distinctions conceptually but does not require every record to carry an epistemic-state field.
 
-Recommended:
-- DESCRIPTION
-- SOURCE_REF
-- DECISION_REF
-- TAGS
-
-STATUS is lifecycle state, not epistemic state.
-
-Recommended lifecycle values:
-- ACTIVE
-- SUPERSEDED
-- DEPRECATED
-- RETRACTED
-- ARCHIVED
-
-## 6. Epistemic state
-
-Epistemic state MUST remain separate from lifecycle state.
-
-Recommended values:
-- KNOWN
-- UNKNOWN
-- CONFLICTING
-- REVIEW_REQUIRED
-
-The following MUST NOT be collapsed into UNKNOWN:
+UNKNOWN is distinct from:
 - NOT_REPORTED
 - NOT_MEASURED
 - NOT_RETRIEVED
 - NOT_APPLICABLE
 - OUT_OF_SCOPE
+- CONFLICTING
+- REVIEW_REQUIRED
 
-These may be represented as explicit values in fields or plugin vocabularies.
+A Plugin decides where these values are valid and whether a field is required.
+
+Missing field != UNKNOWN by default.
 
 ## 7. Evidence closure
 
 Standard retrieval:
 
+```text
 SEARCH
   -> seed QUESTION / PROPOSITION / ENTITY / SOURCE
-  -> resolve explicit relations
-  -> resolve required plugin closure
-  -> collect relevant SOURCE / ACTIVITY / OBSERVATION / ASSESSMENT
-  -> stop when closure criteria are satisfied
+  -> follow explicit relations
+  -> apply active Plugin closure rules
+  -> stop when required evidence closure is satisfied
+```
 
-Default proposition evidence closure:
+Default proposition-oriented closure:
+
+```text
 PROPOSITION
   -> relevant ASSESSMENT
   -> underlying OBSERVATION
   -> generating ACTIVITY
   -> reporting SOURCE
   -> referenced ENTITY identities
-  -> relevant bias / independence / directness assessments
+```
 
-The engine MUST NOT traverse the entire graph when the required closure can be satisfied from a bounded subgraph.
+Additional bias, independence, access, methodological, or domain records are included only when required by the active Plugin or query.
 
-Missing referenced records, broken relation targets, or unresolved required plugin fields -> REVIEW_REQUIRED.
+Missing required referenced records -> REVIEW_REQUIRED.
 
-## 8. Source assertion vs observation vs assessment
+## 8. Meaning separation
 
-These meanings MUST remain separate.
+The following are different semantics:
 
-Example:
-- SOURCE ASSERTS PROPOSITION = the source says it.
-- ACTIVITY GENERATES OBSERVATION = something was observed/derived.
-- ASSESSMENT SUPPORTS PROPOSITION = an evaluator judges that the observation supports the proposition.
+- `SOURCE ASSERTS PROPOSITION`: the source says it.
+- `ACTIVITY GENERATES OBSERVATION`: something was observed or derived.
+- `ASSESSMENT SUPPORTS PROPOSITION`: an evaluator judges that evidence supports it.
 
-A source assertion is not automatically an observation.
-An observation is not automatically support for a proposition.
-Support is not automatically strong, direct, unbiased, or independent.
+Core MUST NOT collapse these.
 
-## 9. Schema Plugin contract
+A source assertion is not automatically evidence.
+An observation is not automatically support.
+Support does not imply strong, direct, unbiased, independent, or sufficient evidence.
 
-A Schema Plugin MAY add:
-- subtype vocabularies
+## 9. Plugin contract
+
+A Plugin MAY add:
+- TYPE subtypes
 - type-specific fields
+- controlled vocabularies
 - relation predicates
-- validation rules
 - closure rules
-- domain-specific epistemic/access states
+- validation rules
 - normalization rules
-- derived-state rules
+- domain-specific derived states
 
-A Schema Plugin MUST declare:
-- PLUGIN_ID
-- VERSION
-- TARGET_CORE_VERSION
+A Plugin MUST declare:
+- `PLUGIN_ID`
+- `VERSION`
+- `TARGET_CORE_VERSION`
 - applicable Core TYPEs
-- added fields
-- required/optional status
-- legacy field-absence semantics
+- added fields and their semantics
+- required vs optional
+- field-absence meaning
 - added relation vocabulary
-- added closure rules
+- closure additions
 - validation rules
 - migration boundary
 
-A plugin MUST NOT:
-- redefine the meaning of a Core TYPE,
+A Plugin MUST NOT:
+- redefine a Core TYPE,
+- change the meaning of an existing Core relation,
 - make unrelated Core records invalid,
-- treat plugin absence as epistemic UNKNOWN,
-- require backfill of unrelated legacy records unless declared as a migration.
+- treat Plugin absence as epistemic UNKNOWN,
+- require unrelated legacy backfill without declaring migration.
 
-Multiple compatible plugins MAY coexist on the same graph.
+Multiple compatible Plugins MAY coexist.
 
 ## 10. Schema evolution
 
 When adding a field, define:
-- field name
-- semantic meaning
-- applicable record types
-- required/optional
-- field absence meaning
-- default, if any
-- backfill requirement
+- meaning
+- applicable TYPE / Plugin
+- required or optional
+- absence semantics
+- default if any
+- backfill rule
 - migration trigger
 
-Field absence is schema-layer absence.
-UNKNOWN is epistemic uncertainty.
-They are never interchangeable by default.
-
-A change is a MIGRATION when:
-- Core TYPE semantics change,
-- record identity boundaries change,
-- relation meaning changes,
-- a previously optional field becomes universally required,
-- default semantics alter legacy meaning,
-- plugin/core authority boundary changes.
+A change is a MIGRATION when it changes:
+- Core TYPE meaning,
+- identity boundary,
+- Core relation meaning,
+- Core/Plugin authority boundary,
+- or legacy meaning through a new universal requirement/default.
 
 ## 11. Physical storage
 
-Research Evidence is a logical database and MAY be stored as:
-- Markdown shards
+Core does not prescribe storage.
+
+Possible representations include:
+- Markdown
 - JSONL
-- CSV/TSV where relations remain explicit
-- database tables
+- CSV/TSV
+- relational tables
 - graph storage
-- mixed versioned files
+- mixed versioned shards
 
-Physical layout MUST NOT define semantic identity.
+Physical layout, timestamps, index files, manifests, and cache structures are not semantic authority unless a separate Adapter explicitly says otherwise.
 
-Indexes/manifests MAY improve retrieval but are navigation/cache, not authority.
+## 12. Minimal validation
 
-## 12. Validation
-
-At minimum validate:
-- IDs are unique within the logical evidence set
-- TYPE is defined
-- relation endpoints exist
-- relation predicates are valid for the active Core/Plugin set
-- required closure can be resolved
-- SOURCE assertion is not silently promoted to OBSERVATION
-- ASSESSMENT is not silently merged into OBSERVATION
-- lifecycle and epistemic states are not conflated
-- field absence is not auto-converted into UNKNOWN/false
-- duplicate/overlapping evidence can be represented without counting publications as independent evidence units
+Validate at least:
+- ID uniqueness within the logical evidence set
+- TYPE is defined by Core or an active Plugin
+- relation endpoints resolve
+- relation predicate is valid
+- required closure can resolve
+- source assertion is not silently promoted to observation
+- assessment is not silently merged into observation
+- field absence is not auto-converted to UNKNOWN/false
+- publication/source count is not silently treated as independent evidence count
 
 ## 13. Boundary with AISPEC
 
 Research Evidence Core:
-- preserves evidence, provenance, observations, propositions, questions, and assessments.
+- represents evidence and evidence interpretation.
 
 AISPEC:
-- defines current normative/semantic rules for AI behavior or project specification.
+- represents current normative/project semantic rules.
 
-Evidence MAY support an AISPEC rule through SOURCE/provenance references.
-Research Evidence does not itself become AISPEC merely because a proposition is well supported.
+Evidence may support AISPEC through explicit provenance, but Research Evidence does not become AISPEC merely because a proposition is well supported.
 
-## 14. Boundary with Work Item Tracker
+## 14. Boundary with Work Item Tracker and Adapters
 
 Work Item Tracker:
 - search path
@@ -372,8 +306,15 @@ Work Item Tracker:
 - why an interpretation was adopted
 - next actions
 
-Research Evidence:
-- durable reusable evidence graph
+Versioned repository:
+- exact representation changes
 
-Exact representation changes:
-- versioned repository / commit history
+Adapters:
+- product/storage/workflow mappings
+- timestamps
+- persistence metadata
+- indexing
+- audit metadata
+- UI/presentation conveniences
+
+These MUST NOT be pushed into Core solely for operational convenience.
