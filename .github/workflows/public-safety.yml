@@ -1,0 +1,27 @@
+name: Public safety
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Scan public repository content
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Scanner self-test
+        run: python3 tools/public_safety_scan.py --self-test
+
+      - name: Scan tracked files
+        env:
+          PUBLIC_SAFETY_PRIVATE_TERMS: ${{ secrets.PUBLIC_SAFETY_PRIVATE_TERMS }}
+        run: python3 tools/public_safety_scan.py
