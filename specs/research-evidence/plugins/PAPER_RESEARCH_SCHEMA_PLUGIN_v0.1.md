@@ -344,6 +344,7 @@ Recommended ROUTE_TYPE:
 - PREPRINT_SERVER
 - OA_DISCOVERY_SERVICE
 - LIBRARY_CATALOG
+- USER_PROVIDED_FILE
 - OTHER_LEGITIMATE_ROUTE
 
 Recommended RESULT:
@@ -367,6 +368,8 @@ Optional:
 If an alternate manuscript/preprint is found and has materially distinct content/version identity, create a SOURCE for it and set FOUND_SOURCE_ID.
 
 A publicly reachable third-party copy with `RIGHTS_STATUS = UNKNOWN` MAY establish that content was technically inspected, but it MUST NOT by itself satisfy a policy requiring a legitimate/open full-text route. Access availability and rights/authorization are separate semantics.
+
+`USER_PROVIDED_FILE` means the researcher/user supplied a readable copy directly to the research workflow. It MAY satisfy research-content access sufficiency for that exact version when the content identity is verified, even when distribution rights are not being assessed. It MUST NOT be reclassified as public OA or used to infer that the file may be redistributed.
 
 ### 13.3 Access location vs SOURCE identity
 
@@ -445,6 +448,11 @@ If the active access-policy route set is incomplete:
 
 If an alternate free version fully satisfies the evidence need:
 - purchase necessity should normally be absent or NOT_NEEDED.
+
+If an exact full-text copy is supplied by the user and verified:
+- access sufficiency may become sufficient for research,
+- an existing PURCHASE_NECESSITY assessment for content access should be superseded or changed to NOT_NEEDED,
+- the prior public/free-route search history remains valid historical evidence and MUST NOT be erased.
 
 ## 17. QUESTION extensions
 
