@@ -61,6 +61,31 @@ Coreでは `Persistent Project Store`、`Versioned Repository`、`Work Item Trac
 
 具体的な製品を使う場合はAdapterで対応付けます。たとえば、利用可能なChatGPT環境では `Persistent Project Store` を **ChatGPT Library** に、GitHubを使う環境では `Work Item Tracker` を **GitHub Issues** に対応付けます。
 
+
+## 毎回の開発開始
+
+各projectは、SAHOU全文をproject内へ複製せず、[PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md) から共通SAHOUを参照します。
+
+標準起動:
+
+```text
+PROJECT_BOOTSTRAP
+  -> SAHOU main exact SHA確認
+  -> 全開発共有のexact-SHA cacheをresolve
+     -> HIT: 検証済みrepository snapshotをfull load
+     -> MISS: current exact snapshotを再取得・検証・cache更新
+  -> project固有spec / Current State / Open Work Item
+  -> 開発開始
+```
+
+shared cacheはSAHOUのauthorityではありません。authorityはGitHub repositoryのref / exact commit / treeです。
+
+- [SAHOU Shared Cache Contract v1.0](specs/platform/SAHOU_SHARED_CACHE_CONTRACT_v1.0.md)
+- [PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md)
+- [snapshot manifest tool](tools/sahou_snapshot_manifest.py)
+
+`SAHOU_FULL.md` のような派生統合fileは作りません。cacheはexact repository snapshotそのものを保持します。
+
 ## ライセンス
 
 MIT License
