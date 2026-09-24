@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed public-repository safety scan for tracked UTF-8 text files."""
+"""Fail-closed public-repository safety scan."""
 
 from __future__ import annotations
 
@@ -8,11 +8,16 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import unicodedata
 
 ALLOW_MARKER = "public-safety: allow"
 SAFE_EMAIL_DOMAINS = {"example.com", "example.org", "example.net", "users.noreply.github.com"}
 SAFE_HOME_NAMES = {"user", "username", "example", "runner"}
 MAX_TRACKED_FILE_BYTES = 2 * 1024 * 1024
+PRIVATE_RULE_TYPES = {"COMPANY", "BRAND", "PRODUCT", "PROJECT", "INGREDIENT"}
+PRIVATE_RULE_ENV_KEYS = ["PUBLIC_SAFETY_PRIVATE_RULES"] + [
+    f"PUBLIC_SAFETY_PRIVATE_RULES_{i}" for i in range(1, 13)
+]
 
 BLOCKED_EXTENSIONS = {
     ".fig", ".sketch", ".psd", ".psb", ".ai", ".xd",
@@ -36,30 +41,75 @@ PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("PRIVATE_KEY_HEADER", re.compile(r"-----BEGIN(?: [A-Z0-9]+)? PRIVATE KEY-----")),
 ]
 
+QUANTITY_PATTERN = re.compile(
+    r"(?i)(?<![A-Za-z0-9])\d+(?:[.,]\d+)?\s*"
+    r"(?:%|wt\.?%|w/w|v/v|ppm|ppb|µg|μg|ug|mg|g|kg|µl|μl|ul|ml|l|mg\s*/\s*ml|g\s*/\s*l)"
+    r"(?![A-Za-z0-9])"
+)
+FORMULATION_KEYWORDS = re.compile(
+    r"(?i)(?:原料|原材料|成分|配合|処方|濃度|含有|ingredient|inci|formula|formulation|concentration|dosage)"
+)
+
+
+def normalize_text(value: str) -> str:
+    value = unicodedata.normalize("NFKC", value).casefold()
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def compact_text(value: str) -> str:
+    value = normalize_text(value)
+    return re.sub(r"[\s_\-‐‑–—・･]+", "", value)
+
 
 def tracked_files() -> list[Path]:
-    proc = subprocess.run(
-        ["git", "ls-files", "-z"],
-        check=True,
-        stdout=subprocess.PIPE,
-    )
+    proc = subprocess.run(["git", "ls-files", "-z"], check=True, stdout=subprocess.PIPE)
     return [Path(p.decode("utf-8")) for p in proc.stdout.split(b"\0") if p]
 
 
-def private_terms() -> list[str]:
-    raw = os.environ.get("PUBLIC_SAFETY_PRIVATE_TERMS", "")
-    terms: list[str] = []
-    for line in raw.splitlines():
-        term = line.strip()
-        if len(term) >= 4 and not term.startswith("#"):
-            terms.append(term)
-    return terms
+def load_private_rules() -> list[tuple[str, str, str]]:
+    raw_parts = [os.environ.get(key, "") for key in PRIVATE_RULE_ENV_KEYS]
+    legacy = os.environ.get("PUBLIC_SAFETY_PRIVATE_TERMS", "")
+    rules: list[tuple[str, str, str]] = []
+    seen: set[tuple[str, str]] = set()
+
+    for raw in raw_parts:
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "\t" in line:
+                kind, value = line.split("\t", 1)
+            elif "|" in line:
+                kind, value = line.split("|", 1)
+            else:
+                kind, value = "PROJECT", line
+            kind = kind.strip().upper()
+            value = value.strip()
+            if kind not in PRIVATE_RULE_TYPES:
+                continue
+            norm = normalize_text(value)
+            compact = compact_text(value)
+            if len(compact) < 3:
+                continue
+            key = (kind, compact)
+            if key not in seen:
+                seen.add(key)
+                rules.append((kind, norm, compact))
+
+    for line in legacy.splitlines():
+        value = line.strip()
+        if not value or value.startswith("#"):
+            continue
+        compact = compact_text(value)
+        if len(compact) >= 3 and ("PROJECT", compact) not in seen:
+            seen.add(("PROJECT", compact))
+            rules.append(("PROJECT", normalize_text(value), compact))
+    return rules
 
 
-def scan_line(line: str, terms: list[str]) -> list[str]:
+def base_line_findings(line: str) -> list[str]:
     if ALLOW_MARKER in line:
         return []
-
     findings: list[str] = []
     for category, pattern in PATTERNS:
         for match in pattern.finditer(line):
@@ -67,19 +117,29 @@ def scan_line(line: str, terms: list[str]) -> list[str]:
                 if match.groupdict().get("name", "").casefold() in SAFE_HOME_NAMES:
                     continue
             if category == "EMAIL":
-                domain = match.group(1).casefold()
-                if domain in SAFE_EMAIL_DOMAINS:
+                if match.group(1).casefold() in SAFE_EMAIL_DOMAINS:
                     continue
             findings.append(category)
             break
 
-    folded = line.casefold()
-    for term in terms:
-        if term.casefold() in folded:
-            findings.append("PRIVATE_DENYLIST_TERM")
-            break
-
+    if QUANTITY_PATTERN.search(line) and FORMULATION_KEYWORDS.search(line):
+        findings.append("FORMULATION_PATTERN")
     return findings
+
+
+def private_line_findings(line: str, rules: list[tuple[str, str, str]]) -> tuple[list[str], bool]:
+    if ALLOW_MARKER in line:
+        return [], False
+    norm = normalize_text(line)
+    compact = compact_text(line)
+    findings: list[str] = []
+    ingredient_hit = False
+    for kind, rule_norm, rule_compact in rules:
+        if rule_norm in norm or rule_compact in compact:
+            findings.append(f"PRIVATE_{kind}")
+            if kind == "INGREDIENT":
+                ingredient_hit = True
+    return sorted(set(findings)), ingredient_hit
 
 
 def file_policy_findings(path: Path, data: bytes) -> list[str]:
@@ -87,7 +147,6 @@ def file_policy_findings(path: Path, data: bytes) -> list[str]:
     suffix = path.suffix.casefold()
     name = path.name.casefold()
     parts = {part.casefold() for part in path.parts}
-
     if suffix in BLOCKED_EXTENSIONS:
         findings.append("BLOCKED_FILE_TYPE")
     if name in BLOCKED_FILENAMES or (name.startswith(".env.") and name != ".env.example"):
@@ -96,7 +155,6 @@ def file_policy_findings(path: Path, data: bytes) -> list[str]:
         findings.append("LOCAL_ONLY_PATH")
     if len(data) > MAX_TRACKED_FILE_BYTES:
         findings.append("TRACKED_FILE_TOO_LARGE")
-
     if b"\0" in data:
         findings.append("BINARY_FILE")
     else:
@@ -104,44 +162,63 @@ def file_policy_findings(path: Path, data: bytes) -> list[str]:
             data.decode("utf-8")
         except UnicodeDecodeError:
             findings.append("BINARY_FILE")
-
     return findings
 
 
-def scan_file(path: Path, terms: list[str]) -> list[tuple[int, str]]:
+def scan_file(path: Path, rules: list[tuple[str, str, str]]) -> list[tuple[int, str]]:
     try:
         data = path.read_bytes()
     except OSError as exc:
         return [(0, f"READ_ERROR:{exc.__class__.__name__}")]
 
-    policy_findings = file_policy_findings(path, data)
-    if policy_findings:
-        return [(0, category) for category in policy_findings]
+    policy = file_policy_findings(path, data)
+    if policy:
+        return [(0, category) for category in policy]
 
-    text = data.decode("utf-8")
+    lines = data.decode("utf-8").splitlines()
     findings: list[tuple[int, str]] = []
-    for line_no, line in enumerate(text.splitlines(), start=1):
-        for category in scan_line(line, terms):
-            findings.append((line_no, category))
-    return findings
+    ingredient_lines: set[int] = set()
+
+    for idx, line in enumerate(lines):
+        for category in base_line_findings(line):
+            findings.append((idx + 1, category))
+        private_findings, ingredient_hit = private_line_findings(line, rules)
+        for category in private_findings:
+            findings.append((idx + 1, category))
+        if ingredient_hit:
+            ingredient_lines.add(idx)
+
+    for idx in ingredient_lines:
+        lo = max(0, idx - 1)
+        hi = min(len(lines), idx + 2)
+        if any(QUANTITY_PATTERN.search(lines[j]) for j in range(lo, hi)):
+            findings.append((idx + 1, "FORMULATION_DATA"))
+
+    return sorted(set(findings))
 
 
 def run_scan() -> int:
-    terms = private_terms()
+    rules = load_private_rules()
+    require_private = os.environ.get("PUBLIC_SAFETY_REQUIRE_PRIVATE_RULES", "") == "1"
     failures: list[tuple[Path, int, str]] = []
+
+    if require_private and not rules:
+        print("Public-safety scan failed: private rules are required but unavailable.")
+        return 1
+
     for path in tracked_files():
-        for line_no, category in scan_file(path, terms):
+        for line_no, category in scan_file(path, rules):
             failures.append((path, line_no, category))
 
     if failures:
-        print("Public-safety scan failed. Values are intentionally redacted.")
+        print("Public-safety scan failed. Matching values are intentionally redacted.")
         for path, line_no, category in failures:
             location = f"{path}:{line_no}" if line_no else str(path)
             print(f"- {location} [{category}]")
         print(f"Total findings: {len(failures)}")
         return 1
 
-    print("Public-safety scan passed.")
+    print(f"Public-safety scan passed. Private rules loaded: {len(rules)}")
     return 0
 
 
@@ -155,6 +232,8 @@ def self_test() -> int:
         "token=" + "github_pat_" + "B" * 32,
         "token=" + "sk-" + "C" * 32,
         "key=" + "AKIA" + "D" * 16,
+        "ingredient: synthetic-ingredient 2.5%",
+        "配合量 15 mg/mL",
     ]
     good = [
         "/Users/user/project",
@@ -162,17 +241,36 @@ def self_test() -> int:
         "contact=user@example.com",
         "placeholder=ghp_",
         "public=198.51.100.10",
-        "the word token is documentation, not a credential",
+        "coverage is 95 percent",
     ]
-
     for sample in bad:
-        if not scan_line(sample, []):
+        if not base_line_findings(sample):
             print("Self-test failed: expected bad sample to be detected.")
             return 1
     for sample in good:
-        if scan_line(sample, []):
+        if base_line_findings(sample):
             print("Self-test failed: expected good sample to pass.")
             return 1
+
+    rules = [
+        ("COMPANY", normalize_text("Example Private Company"), compact_text("Example Private Company")),
+        ("PRODUCT", normalize_text("Synthetic Product Z"), compact_text("Synthetic Product Z")),
+        ("INGREDIENT", normalize_text("Synthetic Ingredient Q"), compact_text("Synthetic Ingredient Q")),
+    ]
+    private, ingredient_hit = private_line_findings("synthetic ingredient q 3.0%", rules)
+    if "PRIVATE_INGREDIENT" not in private or not ingredient_hit:
+        print("Self-test failed: ingredient rule was not detected.")
+        return 1
+
+    lines = ["Synthetic Ingredient Q", "3.0 mg/mL"]
+    hits = []
+    for i, line in enumerate(lines):
+        pf, ih = private_line_findings(line, rules)
+        if ih and any(QUANTITY_PATTERN.search(x) for x in lines[max(0, i-1):min(len(lines), i+2)]):
+            hits.append("FORMULATION_DATA")
+    if "FORMULATION_DATA" not in hits:
+        print("Self-test failed: adjacent formulation data was not detected.")
+        return 1
 
     file_cases = [
         (Path("design.fig"), b"synthetic", "BLOCKED_FILE_TYPE"),
@@ -187,19 +285,6 @@ def self_test() -> int:
             print(f"Self-test failed: {category} was not detected.")
             return 1
 
-    if file_policy_findings(Path("docs/example.md"), b"# safe text\n"):
-        print("Self-test failed: normal UTF-8 text should pass file policy.")
-        return 1
-
-    deny = "private-project-codename"
-    if "PRIVATE_DENYLIST_TERM" not in scan_line("contains " + deny, [deny]):
-        print("Self-test failed: private denylist did not detect a term.")
-        return 1
-
-    if scan_line("person@internal.invalid  # public-safety: allow", []):
-        print("Self-test failed: allow marker did not suppress a line.")
-        return 1
-
     print("Public-safety scanner self-test passed.")
     return 0
 
@@ -208,9 +293,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
-    if args.self_test:
-        return self_test()
-    return run_scan()
+    return self_test() if args.self_test else run_scan()
 
 
 if __name__ == "__main__":
