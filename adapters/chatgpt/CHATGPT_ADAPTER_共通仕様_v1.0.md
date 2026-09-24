@@ -24,3 +24,32 @@ ChatGPT Adapterを使用し、かつChatGPT Libraryが利用可能な環境で�
 ChatGPT Libraryが利用できない環境では、その存在を仮定せず、projectが使用する別のPersistent Project Storeまたはrepository/artifact storeへfallbackする。
 
 公開仕様では `Library` 単独ではなく、製品固有機能を指す場合は `ChatGPT Library` と明記する。
+
+## Shared cache mapping
+
+ChatGPT Libraryが利用可能な環境では、複数project / 複数chatで共通利用するauthorityのexact repository snapshotを、project-specific folderではなく**shared cache領域**へ保存してよい。
+
+SAHOU共通仕様repositoryを利用する場合の標準例:
+
+```text
+/AI_COMMON/SAHOU/
+  current/
+    CURRENT.json
+  snapshots/
+    <exact-commit-sha>/
+      repository snapshot
+      manifest
+```
+
+運用:
+
+1. chat開始時にSAHOU repositoryのcurrent target ref（通常は `main`）のexact commit SHAを確認する。
+2. `CURRENT.json` または同等metadataのSHAと一致し、対象snapshotが検証済みなら、そのshared cacheを**full load**する。
+3. SHAが変わった場合のみGitHub等のVersioned Repositoryから新しいexact repository snapshotを再取得する。
+4. 新snapshotのidentity / manifest / integrityを確認後、shared current pointerを更新する。
+5. `SAHOU_FULL.md` のような派生統合fileをcanonical cacheとして作らない。cache対象はrepository snapshotそのものとする。
+6. projectごとにSAHOU cacheを複製しない。同一repository identity + exact revisionなら全projectで同じshared snapshotを再利用する。
+7. project固有State / private rule / inputは `/AI_COMMON/SAHOU/` に混在させない。
+8. ChatGPT Libraryが利用できない場合は、同等のshared Persistent Project Storeへmappingするか、毎回authorityからexact revisionを取得する。
+
+このshared cacheはChatGPT LibraryをSAHOUのauthorityへ昇格させるものではない。SAHOU repositoryのref / commit / treeがauthorityである。

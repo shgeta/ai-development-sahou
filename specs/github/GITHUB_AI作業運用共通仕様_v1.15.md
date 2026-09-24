@@ -752,6 +752,7 @@ Acceptance criteriaを満たしたIssueはCloseする。
 
 原則として以下を確認してから実装を開始する。
 
+0. PROJECT BOOTSTRAPが共通SAHOU authorityを参照する場合、SAHOU current refのexact SHAを確認する。全開発共有のexact-SHA cacheが同一revisionを保持していればそのrepository snapshotをfull loadし、SHAが変わっている場合のみshared cacheを再取得・更新する。派生 `SAHOU_FULL.md` 等は作らない。
 1. repositoryを特定し、関連するOpen Issueを確認する
 2. PROJECT BOOTSTRAPからLibrary Current Stateへ到達できる場合、active Issue / active branch inventory / merge orderを確認する
 3. `MERGE_READY` または期限到達branchがあれば、新しいbranch作成前にBranch Drain Gateを適用する
@@ -773,6 +774,8 @@ Issueに作業branchがある場合、5の一致確認前に書込みを開始�
 GitHubを継続作業に使うprojectでは、PROJECT BOOTSTRAPから本共通仕様へ到達できるようにする。
 
 PROJECT BOOTSTRAPには、本仕様の全文を複製せず、少なくとも以下を記載する。
+
+共通SAHOUを利用するprojectでは、少なくともSAHOU repository identity、target ref、`load=full`、shared exact-SHA cacheを利用することが分かる参照を持たせる。projectごとにSAHOU全文またはSAHOU cacheを複製しない。
 
 - 本仕様を必読GitHub運用authorityとして参照すること
 - 作業開始時にOpen Issueを確認すること
