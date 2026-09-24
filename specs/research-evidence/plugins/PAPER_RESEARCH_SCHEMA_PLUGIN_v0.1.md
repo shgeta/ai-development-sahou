@@ -4,28 +4,36 @@
 - Status: CANDIDATE
 - Plugin ID: RESEARCH_EVIDENCE.PAPER
 - Target Core: Research Evidence Core Schema v0.1
-- Scope: journal articles, conference papers/abstracts, theses/dissertations, preprints, systematic reviews, and related scholarly-source research
+- Scope: scholarly-source identity, publication relations, literature-search provenance, access/retrieval, paper-level evidence extraction, and publication independence/lineage
 - Decision history: ai-development-sahou Issue #17
 
 ## 1. Purpose
 
-This plugin extends Research Evidence Core for paper/literature research without contaminating Core with literature-specific fields.
+Paper Research Plugin extends Research Evidence Core only for semantics that arise from researching scholarly literature.
 
-It supports:
-- bibliographic identity
-- study design and cohort/sample detail
-- author/affiliation/provenance
-- publication lineage and overlap
-- outcome/result extraction
-- source access state
-- legitimate free full-text retrieval trail
-- purchase-candidate derivation
-- risk-of-bias / directness / independence assessment
-- systematic-review/search reproducibility
+It covers:
+- scholarly-source identity and identifiers,
+- authorship / affiliation / funding provenance,
+- publication-version and update relations,
+- literature-search and screening activities,
+- paper access and legitimate free-full-text retrieval,
+- extraction location/provenance,
+- publication lineage / overlap / independence,
+- purchase-candidate assessment.
+
+It does NOT own domain-specific scientific semantics such as:
+- clinical PICO,
+- RCT randomization/blinding detail,
+- toxicology endpoints,
+- analytical-chemistry conditions,
+- animal-model fields,
+- regulatory jurisdiction rules.
+
+Those belong in compatible domain plugins.
 
 ## 2. Applicable Core types
 
-The plugin extends:
+This plugin may extend:
 - SOURCE
 - ENTITY
 - ACTIVITY
@@ -34,355 +42,476 @@ The plugin extends:
 - ASSESSMENT
 - RELATION
 
-PROPOSITION normally uses Core semantics without mandatory paper-specific fields.
+PROPOSITION normally uses Core semantics unchanged.
 
-## 3. SOURCE extensions
+## 3. Scholarly SOURCE identity
 
-Recommended SOURCE subtypes:
+### 3.1 SOURCE_KIND
+
+Recommended scholarly SOURCE_KIND values:
 - JOURNAL_ARTICLE
 - CONFERENCE_PAPER
 - CONFERENCE_ABSTRACT
 - PREPRINT
 - THESIS
 - DISSERTATION
-- REVIEW_ARTICLE
-- SYSTEMATIC_REVIEW
-- META_ANALYSIS
-- CORRECTION
+- BOOK_CHAPTER
+- REPORT
+- CORRECTION_NOTICE
 - RETRACTION_NOTICE
+- OTHER_SCHOLARLY_SOURCE
 
-Bibliographic fields:
+`SYSTEMATIC_REVIEW`, `META_ANALYSIS`, `RCT`, `IN_VITRO` and similar research methods are NOT SOURCE_KIND values.
+They describe ACTIVITY or a domain plugin's study design.
+
+### 3.2 Bibliographic identifiers
+
+Do not create one universal column per identifier system.
+
+Use repeatable identifier records/values:
+
+- IDENTIFIER_SCHEME
+- IDENTIFIER_VALUE
+
+Common schemes:
 - DOI
 - PMID
 - PMCID
-- TITLE_CANONICAL
-- JOURNAL
-- YEAR
+- ISBN
+- ISSN
+- HANDLE
+- ARK
+- INSTITUTIONAL_ID
+- OTHER
+
+Multiple identifiers may identify the same SOURCE.
+DOI / PMID / PMCID MUST NOT be treated as separate SOURCE identities merely because the identifier schemes differ.
+
+Normalization rules:
+- DOI comparisons are case-insensitive after DOI normalization.
+- identifier display formatting does not change SOURCE identity.
+- raw identifier text MAY be retained by an Adapter or ingestion plugin.
+
+### 3.3 Bibliographic description fields
+
+Optional paper-level fields:
+- TITLE
+- CONTAINER_TITLE
+- PUBLISHED_DATE
 - VOLUME
 - ISSUE
-- PAGES_OR_ARTICLE_NUMBER
-- PUBLISHER
+- LOCATOR
 - LANGUAGE
-- PUBLICATION_DATE
-- RETRACTION_STATUS
 
-Version fields:
-- VERSION_TYPE = VERSION_OF_RECORD | ACCEPTED_MANUSCRIPT | PREPRINT | AUTHOR_MANUSCRIPT | OTHER
-- VERSION_OF_SOURCE_ID
-- CONTENT_EQUIVALENCE = SAME | SUBSTANTIALLY_SAME | DIFFERENT | UNKNOWN
+`LOCATOR` may hold pages or article number.
 
-Access summary fields are derived where possible and MUST NOT erase access-check history.
+`YEAR` is derived from PUBLISHED_DATE when the latter is available and SHOULD NOT be a second semantic authority.
 
-## 4. ENTITY extensions
+Publisher is preferably represented as an ENTITY relation rather than a repeated free-text publisher field.
 
-Recommended ENTITY subtypes:
+### 3.4 SOURCE identity boundary
+
+Treat the following as the same SOURCE:
+- HTML and PDF locators for the same content version,
+- multiple repository/publisher locations serving the same exact content version,
+- alternate identifier schemes pointing to the same scholarly source.
+
+Treat materially different content versions as distinct SOURCE records and link them:
+- preprint vs version of record,
+- accepted manuscript vs version of record,
+- translated version when content identity is not exact,
+- correction/retraction notice vs affected paper.
+
+If version identity is uncertain, do not merge; use an explicit uncertain lineage ASSESSMENT.
+
+## 4. Publication/version relations
+
+Recommended relation predicates:
+- SOURCE PREPRINT_OF SOURCE
+- SOURCE MANUSCRIPT_OF SOURCE
+- SOURCE VERSION_OF SOURCE
+- SOURCE TRANSLATION_OF SOURCE
+- SOURCE DERIVED_FROM SOURCE
+- SOURCE COMMENT_ON SOURCE
+- SOURCE SUPPLEMENTS SOURCE
+- SOURCE CORRECTS SOURCE
+- SOURCE RETRACTS SOURCE
+- SOURCE REPLACES SOURCE
+
+These are aligned where practical with established scholarly relation vocabularies such as Crossref relations.
+
+Version relation does not itself imply identical content.
+
+When useful, attach a publication-lineage ASSESSMENT with:
+- EQUIVALENCE = IDENTICAL | SUBSTANTIALLY_SAME | PARTIAL | DIFFERENT | UNKNOWN
+- RATIONALE
+
+## 5. Contributor and organization provenance
+
+Recommended ENTITY kinds used by this plugin:
 - PERSON
 - ORGANIZATION
-- POPULATION
-- SPECIMEN
-- INTERVENTION
-- EXPOSURE
-- COMPARATOR
-- OUTCOME
-- METHOD
-- INSTRUMENT
 
-Author/affiliation relations:
-- SOURCE AUTHORED_BY ENTITY(PERSON)
-- ENTITY(PERSON) AFFILIATED_WITH ENTITY(ORGANIZATION)
-- SOURCE FUNDED_BY ENTITY(ORGANIZATION)
-- SOURCE MATERIAL_PROVIDED_BY ENTITY(ORGANIZATION)
-- SOURCE CONFLICT_DISCLOSURE_ABOUT ENTITY
+Recommended relations:
+- SOURCE AUTHORED_BY PERSON
+- SOURCE EDITED_BY PERSON
+- SOURCE PUBLISHED_BY ORGANIZATION
+- SOURCE FUNDED_BY ORGANIZATION
+- SOURCE MATERIAL_PROVIDED_BY ORGANIZATION
 
-Author/organization identity normalization SHOULD preserve aliases and name changes without multiplying entities.
+Authorship relation qualifiers MAY include:
+- CONTRIBUTOR_ORDER
+- CORRESPONDING = true|false|unknown
+- AFFILIATION_ENTITY_IDS
+- RAW_AFFILIATION_TEXT
 
-## 5. ACTIVITY extensions
+Affiliation is source-contextual.
+Do NOT infer a person's timeless affiliation from one paper.
 
-Recommended ACTIVITY subtypes:
-- RCT
-- NONRANDOMIZED_TRIAL
-- OBSERVATIONAL_STUDY
-- COHORT_STUDY
-- CASE_CONTROL
-- CROSS_SECTIONAL
-- CASE_SERIES
-- IN_VITRO_EXPERIMENT
-- EX_VIVO_EXPERIMENT
-- ANIMAL_EXPERIMENT
-- ANALYTICAL_ASSAY
-- COMPUTATIONAL_ANALYSIS
-- SYSTEMATIC_SEARCH
+Author and organization identity normalization SHOULD preserve aliases, language variants, initials, and name changes without multiplying entities when identity is established.
+
+## 6. Paper-research ACTIVITY kinds
+
+Paper Plugin defines only literature-research-specific activities:
+
+- LITERATURE_SEARCH
 - SCREENING
 - DATA_EXTRACTION
-- META_ANALYSIS_ACTIVITY
 - PAPER_ACCESS_CHECK
 
-Study/execution fields MAY include:
-- STUDY_DESIGN
-- STUDY_SITE
-- RECRUITMENT_START
-- RECRUITMENT_END
-- SAMPLE_SIZE_PLANNED
-- SAMPLE_SIZE_ANALYZED
-- RANDOMIZATION
-- BLINDING
-- ANALYSIS_SET
-- FOLLOWUP_DURATION
+Scientific study/experiment design belongs to domain plugins or Core ACTIVITY plus domain semantics.
 
-Domain-specific detail such as clinical PICO SHOULD be supplied by further compatible plugins/profile fields rather than promoted to Paper Core unless universally useful.
+A SOURCE may report one or many scientific ACTIVITY records even when Paper Plugin itself does not define their scientific subtype.
 
-## 6. OBSERVATION extensions
+## 7. Literature search
+
+### 7.1 LITERATURE_SEARCH fields
 
 Recommended fields:
-- ENDPOINT_REF
-- POPULATION_OR_SAMPLE_REF
-- INTERVENTION_OR_EXPOSURE_REF
-- COMPARATOR_REF
-- TIMEPOINT
+- QUESTION_ID
+- SEARCH_TARGET_REF
+- QUERY_TEXT_OR_REF
+- SEARCHED_AT
+- DATE_COVERAGE
+- FILTERS
+- RESULT_COUNT
+
+Recommended relations:
+- ACTIVITY DISCOVERED SOURCE
+- ACTIVITY USED SOURCE_OR_ENTITY
+
+`SEARCH_TARGET_REF` may identify a bibliographic database, search engine, repository, registry, or catalog.
+
+High-value/systematic searches SHOULD preserve enough query/date/target detail to reconstruct the search.
+
+Routine exploratory searches MAY remain only in Work Item history unless project policy promotes them into durable evidence.
+
+### 7.2 Absence-of-evidence rule
+
+"Nothing was found" is not timeless evidence.
+
+Represent it as:
+- bounded LITERATURE_SEARCH activity,
+- search-result observation,
+- optional EVIDENCE_GAP assessment.
+
+Its meaning is bounded by query, target, filters, coverage, and SEARCHED_AT.
+
+## 8. Screening and extraction
+
+### 8.1 SCREENING
+
+Recommended fields:
+- QUESTION_ID
+- STAGE = TITLE_ABSTRACT | FULL_TEXT | OTHER
+- DECISION = INCLUDE | EXCLUDE | UNCERTAIN
+- REASON
+
+Screening decisions apply to SOURCE records and are question-specific.
+
+### 8.2 DATA_EXTRACTION
+
+Use DATA_EXTRACTION when durable provenance is needed for how paper content was converted into evidence records.
+
+Recommended fields:
+- TARGET_SOURCE_ID
+- EXTRACTED_AT
+- EXTRACTION_SCOPE
+
+Recommended relations:
+- DATA_EXTRACTION GENERATED OBSERVATION
+- DATA_EXTRACTION GENERATED PROPOSITION
+- DATA_EXTRACTION USED SOURCE
+
+Extraction activity does not make the extracted statement true; it records extraction provenance.
+
+## 9. OBSERVATION fields for paper extraction
+
+Paper Plugin adds only source-reporting fields, not domain endpoint schemas.
+
+Optional fields:
+- OBSERVATION_FORM = QUANTITATIVE | QUALITATIVE | CATEGORICAL | TEXTUAL | NOT_ESTIMABLE
 - VALUE
 - UNIT
-- EFFECT_MEASURE
+- STATISTIC_TYPE
 - UNCERTAINTY_INTERVAL
 - P_VALUE
-- DIRECTION
-- RESULT_FORM = QUANTITATIVE | QUALITATIVE | NULL | NEGATIVE | NONSIGNIFICANT | NOT_ESTIMABLE
-- ANALYSIS_SET
-- REPORTED_LOCATION
+- SOURCE_LOCATOR
 
-NOT_REPORTED and NOT_MEASURED MUST remain distinguishable.
+`SOURCE_LOCATOR` may point to page, section, table, figure, supplement, paragraph anchor, or equivalent retrievable location.
 
-## 7. ASSESSMENT extensions
+Endpoint, exposure, comparator, specimen, population, timepoint, assay method, dose and similar scientific semantics belong in domain plugins or explicit ENTITY/RELATION structures.
+
+`NEGATIVE`, `NONSIGNIFICANT`, and `SUPPORTIVE` are not OBSERVATION_FORM values because they embed interpretation.
+
+NOT_REPORTED and NOT_MEASURED MUST remain distinguishable from an observed null result.
+
+## 10. Source assertion handling
+
+When an abstract/discussion/conclusion statement matters to the research question:
+- represent its content as a PROPOSITION,
+- link `SOURCE ASSERTS PROPOSITION`.
+
+Do NOT convert the source's conclusion directly into OBSERVATION unless the underlying reported result was actually extracted.
+
+A review article repeating another source's interpretation remains a source assertion until the underlying evidence is resolved.
+
+## 11. Paper-related ASSESSMENT kinds
 
 Recommended ASSESSMENT_TYPE values:
 - CLAIM_SUPPORT
-- CONTRADICTION
-- RISK_OF_BIAS
-- INDEPENDENCE
 - DIRECTNESS
 - APPLICABILITY
+- RISK_OF_BIAS
+- INDEPENDENCE
 - DUPLICATION
 - COHORT_OVERLAP
 - PUBLICATION_LINEAGE
 - REPORTING_COMPLETENESS
-- SOURCE_AUTHORITY
+- ACCESS_SUFFICIENCY
+- PURCHASE_NECESSITY
 - EVIDENCE_GAP
-- BODY_OF_EVIDENCE_CERTAINTY
 
-Do not use one universal QUALITY_SCORE.
+Do NOT define one universal QUALITY_SCORE.
 
-Framework-specific assessments SHOULD declare:
+Framework-specific assessment fields MAY include:
 - FRAMEWORK
 - FRAMEWORK_VERSION
 - DOMAIN
 - JUDGMENT
 - RATIONALE
 
-Examples:
-- RoB 2 domain judgment
-- GRADE certainty at outcome/body-of-evidence level
+Domain-specific frameworks such as clinical RoB or GRADE SHOULD normally be supplied by a compatible domain plugin; Paper Plugin only provides the assessment attachment pattern.
 
-## 8. Research question extensions
+## 12. Publication lineage and non-independence
 
-QUESTION MAY carry:
-- QUESTION_SCOPE
-- DATE_WINDOW
-- LANGUAGE_SCOPE
-- INCLUSION_RULE_REF
-- EXCLUSION_RULE_REF
+Publication count MUST NOT be used as independent-evidence count.
 
-PICO fields SHOULD be added only when a clinical-question profile/plugin is active.
-
-## 9. Publication lineage and non-independence
-
-Recommended relations:
+Recommended relations/assessments:
 - SOURCE PREPRINT_OF SOURCE
-- SOURCE PUBLISHED_VERSION_OF SOURCE
-- SOURCE EXTENDS SOURCE
+- SOURCE MANUSCRIPT_OF SOURCE
+- SOURCE DERIVED_FROM SOURCE
 - SOURCE SECONDARY_ANALYSIS_OF SOURCE
 - SOURCE REPORTS_SAME_COHORT_AS SOURCE
 - SOURCE POSSIBLY_OVERLAPS_WITH SOURCE
-- SOURCE CORRECTED_BY SOURCE
-- SOURCE RETRACTED_BY SOURCE
+- ASSESSMENT type PUBLICATION_LINEAGE
+- ASSESSMENT type COHORT_OVERLAP
+- ASSESSMENT type INDEPENDENCE
 
-Publication count MUST NOT be used as independent-evidence count without resolving relevant duplication/cohort-overlap assessments.
+Use explicit uncertainty where raw-data identity is not established.
 
-## 10. Free full-text retrieval trail
+## 13. Full-text access and free-route search
 
-A publisher paywall alone MUST NOT establish that no free full text exists.
+### 13.1 Principle
 
-Use ACTIVITY subtype:
-- PAPER_ACCESS_CHECK
+A paywalled publisher page does not establish that no legitimate free full text exists.
 
-Required fields:
+Paper access is a search/retrieval problem with history.
+
+### 13.2 PAPER_ACCESS_CHECK
+
+Required:
 - TARGET_SOURCE_ID
 - ROUTE_TYPE
 - RESULT
 - CHECKED_AT
 
 Recommended ROUTE_TYPE:
-- PUBLISHER_OA
-- PMC_OR_DOMAIN_REPOSITORY
+- PUBLISHER
+- DOMAIN_REPOSITORY
 - INSTITUTIONAL_REPOSITORY
 - AUTHOR_MANUSCRIPT
 - PREPRINT_SERVER
-- DOI_OA_DISCOVERY
+- OA_DISCOVERY_SERVICE
 - LIBRARY_CATALOG
-- OTHER_LEGITIMATE_FREE_ROUTE
+- OTHER_LEGITIMATE_ROUTE
 
-RESULT:
-- FULL_TEXT_FOUND
+Recommended RESULT:
+- EXACT_FULL_TEXT_FOUND
+- ALTERNATE_VERSION_FOUND
 - ABSTRACT_ONLY
 - METADATA_ONLY
+- PAYWALL
 - NOT_FOUND
 - ACCESS_BLOCKED
 - VERSION_MISMATCH
 - RETRACTED_OR_SUPERSEDED
 
 Optional:
-- ACCESS_URL_OR_REF
-- VERSION_TYPE
+- FOUND_SOURCE_ID
+- LOCATOR_URL_OR_REF
 - LICENSE
 - NOTE
 
-## 11. Derived source access state
+If an alternate manuscript/preprint is found and has materially distinct content/version identity, create a SOURCE for it and set FOUND_SOURCE_ID.
 
-Source-level ACCESS_STATE SHOULD be derived from access-check activities where possible.
+### 13.3 Access location vs SOURCE identity
 
-Recommended values:
-- FREE_FULL_TEXT_VERIFIED
-- FREE_ALTERNATE_VERSION_VERIFIED
+Multiple URLs/locations serving the same exact version do not require multiple SOURCE records.
+
+Different scholarly versions do require distinct SOURCE records when their content version materially differs.
+
+This allows:
+- one SOURCE = version of record,
+- one SOURCE = accepted manuscript,
+- relation = MANUSCRIPT_OF,
+- many access locations without duplicating the source identity.
+
+## 14. Derived access state
+
+Access state is derived convenience data and MUST NOT erase access-check history.
+
+Recommended derived states:
+- EXACT_FULL_TEXT_AVAILABLE
+- ALTERNATE_FULL_TEXT_AVAILABLE
 - ABSTRACT_ONLY
 - METADATA_ONLY
-- PAYWALLED_AFTER_FREE_ROUTE_CHECK
+- NO_FREE_FULL_TEXT_FOUND
 - FREE_ROUTE_SEARCH_INCOMPLETE
-- UNAVAILABLE
 - ACCESS_BLOCKED
+- UNAVAILABLE
 
-Rules:
-- PAYWALLED_AFTER_FREE_ROUTE_CHECK MUST NOT be inferred solely from a paywalled publisher page.
-- FREE_FULL_TEXT_VERIFIED requires a retrievable full text matching the target source/version or an explicitly accepted alternate version.
-- VERSION_MISMATCH does not satisfy exact-version full-text closure.
-- CHECKED_AT is required because access availability can change.
+Do NOT use a single PAYWALLED state as the work-level conclusion because publisher paywall and free repository availability can coexist.
 
-## 12. Purchase candidate
+A project's access policy defines which free routes are required for closure.
+Paper Plugin does not hard-code that every project must check every possible route.
 
-PURCHASE_CANDIDATE is a derived assessment/state, not a Core SOURCE subtype.
+## 15. Purchase candidate
 
-A paper MAY become a purchase candidate when:
-1. its evidence value is material to an unresolved QUESTION/PROPOSITION,
-2. exact or adequate full text has not been obtained,
-3. configured legitimate free-route closure has been attempted or explicitly waived,
-4. abstract/metadata are insufficient for the required evidence closure.
+Purchase need is an ASSESSMENT, not a SOURCE kind.
 
-Recommended ASSESSMENT_TYPE:
-- PURCHASE_NECESSITY
+Use:
+- ASSESSMENT_TYPE = PURCHASE_NECESSITY
 
 Recommended fields:
 - TARGET_SOURCE_ID
 - PRIORITY = HIGH | MEDIUM | LOW
 - REASON
 - NEEDED_FOR
+- NEEDED_CONTENT
 - FREE_ROUTE_CLOSURE_STATUS
 - EXPECTED_DECISION_IMPACT
 - KNOWN_PRICE
 - PRICE_CURRENCY
 - PRICE_CHECKED_AT
 
+Rules:
+1. evidence value must be material to an unresolved QUESTION or PROPOSITION,
+2. adequate full text is not already available,
+3. configured legitimate free-route closure has been attempted or explicitly waived,
+4. metadata/abstract/alternate version is insufficient for the required evidence closure.
+
 Known price is optional and MUST NOT be invented.
 
-## 13. Paper access closure
+## 16. Access closure
 
-For a source needed at full-text level:
+For a scholarly source needed at full-text level:
 
+```text
 SOURCE
   -> PAPER_ACCESS_CHECK activities
-  -> legitimate route results
-  -> version identity
-  -> access state
-  -> if unresolved and material: PURCHASE_NECESSITY assessment
+  -> access locations / FOUND_SOURCE_ID
+  -> publication-version relations
+  -> derived access state
+  -> ACCESS_SUFFICIENCY assessment
+  -> PURCHASE_NECESSITY assessment if still required
+```
 
-A source MUST remain FREE_ROUTE_SEARCH_INCOMPLETE when required configured routes have not been checked.
+If the active access-policy route set is incomplete:
+- derived state = FREE_ROUTE_SEARCH_INCOMPLETE.
 
-## 14. Search reproducibility
+If an alternate free version fully satisfies the evidence need:
+- purchase necessity should normally be absent or NOT_NEEDED.
 
-For systematic or high-value literature searches, ACTIVITY subtype SYSTEMATIC_SEARCH SHOULD preserve:
-- QUESTION_ID
-- DATABASE_OR_INDEX
-- SEARCH_STRING_OR_QUERY_REF
-- DATE_SEARCHED
-- DATE_COVERAGE
-- FILTERS
-- RESULT_COUNT
-- DEDUPLICATION_METHOD
-- SCREENING_ACTIVITY_REF
+## 17. QUESTION extensions
 
-Routine exploratory web searches MAY remain in Work Item history unless project policy promotes them into durable evidence records.
+Optional literature-research fields:
+- DATE_WINDOW
+- LANGUAGE_SCOPE
+- INCLUSION_RULE_REF
+- EXCLUSION_RULE_REF
+- ACCESS_POLICY_REF
 
-## 15. Study identity boundary
+Clinical PICO is not defined here.
 
-One paper MAY report multiple ACTIVITY records.
+## 18. Scientific ACTIVITY identity from papers
 
-Split ACTIVITY when:
-- distinct cohort/sample
-- distinct protocol
-- distinct experiment
-- distinct analytic population
-- distinct assay with independently interpretable results
+One SOURCE may report multiple scientific ACTIVITY records.
 
-Do not split merely because a paper has multiple endpoints if one protocol/execution unit produced them; those normally become multiple OBSERVATION records.
+Split scientific ACTIVITY when the execution/reproducibility unit materially changes, for example:
+- different cohort/sample set,
+- different experimental protocol,
+- separate assay/analysis,
+- distinct study phase,
+- independent analytic population.
 
-## 16. Observation identity boundary
+Do not split solely because one activity produced multiple endpoints; those can be separate OBSERVATION records.
 
-Split OBSERVATION when any of these materially changes:
-- endpoint
-- comparison
-- dose/exposure
-- timepoint
-- population/sample stratum
-- analysis set
-- effect estimate/value
+Specific study-design fields belong to domain plugins.
 
-This makes result-level bias/directness assessment possible.
+## 19. Paper evidence closure
 
-## 17. Source assertion handling
+For a proposition whose evidence is reported in scholarly literature:
 
-Statements in abstract/discussion/conclusion SHOULD be represented as PROPOSITIONs asserted by SOURCE when they matter to the research question.
-
-They MUST NOT be converted into OBSERVATION unless the underlying activity/result is actually available and extracted.
-
-## 18. Minimal paper evidence closure
-
-For a proposition based on a paper:
-
+```text
 PROPOSITION
-  -> support/contradiction ASSESSMENT
+  -> relevant ASSESSMENT
   -> OBSERVATION
-  -> ACTIVITY
-  -> SOURCE
-  -> author/organization provenance needed for independence
-  -> relevant risk-of-bias/directness/duplication assessments
-  -> access/version status when full-text sufficiency matters
+  -> scientific ACTIVITY
+  -> reporting SOURCE
+  -> publication-version relation if relevant
+  -> contributor/organization provenance only when needed
+  -> lineage/duplication/independence assessments only when needed
+  -> access/extraction provenance only when sufficiency depends on it
+```
 
-## 19. Validation
+Do not automatically load every author, affiliation, citation, or access check when it is irrelevant to the current evidence question.
 
-At minimum validate:
-- DOI/PMID/PMCID identifiers are not treated as separate source identities by default
-- publication versions are linked when known
-- paper count is not silently used as independent evidence count
-- abstract-only access is not represented as full-text access
-- publisher paywall is not equivalent to no legitimate free version
-- NOT_REPORTED != NOT_MEASURED != NOT_RETRIEVED
-- source conclusion text is not silently promoted to empirical observation
-- result-level assessments can target specific OBSERVATION records
-- purchase candidates are traceable to free-route search history
-- systematic-search records preserve enough query/date/source information for reconstruction when required
+## 20. Validation
 
-## 20. Compatibility
+Validate at least:
+- multiple identifiers may map to one SOURCE
+- identifier scheme differences do not create duplicate sources
+- materially different publication versions are linked, not silently merged
+- HTML/PDF locations of the same exact version are not duplicated as separate sources
+- systematic review / meta-analysis are not confused with SOURCE_KIND
+- source conclusion text is not silently promoted to OBSERVATION
+- NOT_REPORTED != NOT_MEASURED != null/zero result
+- publisher PAYWALL does not imply NO_FREE_FULL_TEXT_FOUND
+- alternate-version access is distinguished from exact-version access
+- purchase necessity traces to access-check closure and an unresolved evidence need
+- publication count is not treated as independent-evidence count
+- source-contextual affiliation is not inferred as timeless person affiliation
+- search "no result" statements remain bounded by search activity/date/query
+- paper-specific fields do not require clinical/toxicology/chemistry semantics
 
-This plugin may coexist with:
-- clinical research plugin
-- toxicology plugin
-- analytical chemistry plugin
-- regulatory evidence plugin
+## 21. Compatibility
 
-Those plugins may add further domain semantics without redefining Paper Plugin fields.
+Paper Plugin may coexist with domain plugins such as:
+- Clinical Research
+- Toxicology
+- Analytical Chemistry
+- Regulatory Evidence
+- Product/Vehicle Research
+
+Those plugins may define scientific study design, endpoint, exposure, dose, model, and assessment vocabularies without redefining Paper Plugin source/access/publication semantics.
