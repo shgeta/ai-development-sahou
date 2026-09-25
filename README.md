@@ -48,6 +48,15 @@ Work Itemは成功時だけ残すものではありません。失敗・却下�
 - [Status + Issue Binding](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_STATUS_ISSUE_BINDING.md)
 - [Issue Outcome Retention](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_ISSUE_OUTCOME_RETENTION.md)
 
+### Research
+- [Research Core v0.1](specs/research-evidence/RESEARCH_CORE_v0.1.md)
+- [Research Evidence Core Schema v0.1](specs/research-evidence/RESEARCH_EVIDENCE_CORE_SCHEMA_v0.1.md)
+- [Paper Research Schema Plugin v0.1](specs/research-evidence/plugins/PAPER_RESEARCH_SCHEMA_PLUGIN_v0.1.md)
+- [Analysis Research Schema Plugin v0.1](specs/research-evidence/plugins/ANALYSIS_RESEARCH_SCHEMA_PLUGIN_v0.1.md)
+- [Synthetic Research Stress Test v0.1](specs/research-evidence/examples/RESEARCH_EVIDENCE_SYNTHETIC_STRESS_TEST_v0.1.md)
+
+Researchは文献検索だけを指しません。source research、empirical investigation、data/code/log/visual analytics、evidence evaluation、synthesisを含む上位概念です。AnalyticsはResearch内のACTIVITYとして扱います。
+
 ### Safe Commit
 - [Safe Commit Engine AISPEC v1.2](specs/safe-commit/GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md)
 - [Safe Commit Engine Reference v1.1](specs/safe-commit/GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md)
