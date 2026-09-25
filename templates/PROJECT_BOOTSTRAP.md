@@ -28,6 +28,17 @@
 - Current State: `<persistent-store reference>`
 - Work Item Tracker: `<tracker reference>`
 
+## Production Web update log
+
+production Web siteを変更するprojectでは記載する。対象外なら `N/A` と明示する。
+
+- Common authority: `specs/web/WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md` or `N/A`
+- Canonical log: `<path/store reference or N/A>`
+- Format / schema: `<format and version or N/A>`
+- Writer: `<workflow/tool/store append mechanism or N/A>`
+- Concurrency control: `<serialization/atomic append/HEAD guard or N/A>`
+- Logging failure recovery: `<procedure or N/A>`
+
 ## Project-specific guardrails
 
 - <project固有rule>
