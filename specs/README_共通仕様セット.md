@@ -16,6 +16,7 @@
 4. Safe Commit Engineを実際にどう使うか
 5. production Web siteの変更履歴をどうappend-onlyで追跡するか
 
+
 ## 1.1 Public-safe by construction
 
 この共通仕様folderは、将来そのままpublic repositoryへ公開され得る内容として維持する。
@@ -65,7 +66,25 @@ repositoryのIssue運用やcommit手順そのものは `GITHUB_AI作業運用共
 
 ### GitHub AI作業運用
 
-GitHub作業では `GITHUB_AI作業運用共通仕様_v1.15.md` をauthorityとする。Issue / branch / commit / CI / restartabilityを扱う。
+GitHub作業では原則として以下をauthorityとする。
+
+- 1作業テーマ = 1 Issue
+- AISPECはcurrent semantic authority、Issueはcanonical change unit / semantic decision history、commit/PRはexact diffとする
+- semantic changeはIssueなしのcommitだけで完結させず、AISPEC `DECISION_REF` ↔ Issue affected RULE_IDを双方向に追跡可能にする
+- Issueで作業branch / HEADを確定し、書込み前に現在のcheckout branchとの一致を確認する。local worktree pathはhandoff authorityにしない
+- branchを作成した場合はIssueに Branch Class / Merge Intent / Branch State / Review or Expiry / Keep or Drop Ruleを記録し、mergeするbranchと捨ててよいbranchを明示する
+- 新branch作成前にBranch Drain Gateを行い、MERGE_READYなbranchを先に閉じる。Library Current Stateにはactive branch inventoryとmerge orderをmirrorする
+- HANDOFF専用commitを作らない
+- 重要checkpointはIssueコメントへ残す
+- repository / current spec / current Issueを古い会話より優先する
+- tests / CIをcommit SHAまで追跡する
+- containerの外部アクセス制限時はGitHub Actionsで取得し、repository全体・巨大fileを含めartifactとして回収して作業継続する
+- 重いlocal commandは安全に分離・並行実行し、待ち時間中に依存しない作業を進める
+- pytestはすべての実行経路でproject固有の `PYTHONPATH` を明示し、canonical値をBOOTSTRAPへ記録する
+- projectの継続作業に必要な固定情報を追加・変更した場合、同じ変更単位でPROJECT BOOTSTRAPから到達可能にする
+- Libraryへ保存するuser受領データはrepository / project単位の専用folderへ集約し、同一案件で再利用する
+- GitHub repository全体の再利用snapshotは `/GitHubRepos/<owner>__<repo>/repo-snapshots/` にexact SHA/hash/manifest付きで保持し、artifactは原則30日、Libraryはcurrent + previous 1世代でrotationする
+- project全体とactive Issueのcurrent focus / 順序 / blocker / nextはLibrary Current Stateで共有してよいが、Issueにできる大きさの作業はIssueを主としSTATEだけで抱え続けない
 
 ### Web Site Update Log
 
