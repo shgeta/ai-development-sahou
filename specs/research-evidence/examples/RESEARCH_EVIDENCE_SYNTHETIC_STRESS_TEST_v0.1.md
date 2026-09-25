@@ -446,3 +446,64 @@ The schema/plugin fails if it:
 7. accepts stale-generation comparison metrics,
 8. deduplicates source occurrences together with reusable material,
 9. converts UNKNOWN / REVIEW_REQUIRED residuals into implementation defects without evidence.
+
+
+## 14. Scope-anchor / subset-drift stress test
+
+A synthetic formulation project investigates all candidate raw materials that may activate or support Receptor-R in skin.
+
+### 14.1 Scope Anchor
+
+The anchored universe includes:
+- defined small molecules,
+- organic acids,
+- vitamins,
+- fatty acids and lipids,
+- fragrance molecules,
+- isolated natural products,
+- standardized botanical extracts,
+- complex cosmetic raw materials.
+
+The project later reviews one publication that screens only botanical extracts.
+
+The publication identifies several interesting botanical hits.
+
+### 14.2 Follow-up request
+
+After reviewing that publication, the user asks:
+
+> Find the actual commercial raw-material names and manufacturers.
+
+Expected behavior:
+- resolve the follow-up target from the **full anchored universe**;
+- use the botanical publication as one subset/source;
+- map commercial suppliers across chemical, lipid, vitamin, fragrance, isolated-natural-product, extract, and complex-material classes;
+- optionally run a botanical subset pass, but label it explicitly as such.
+
+Failure behavior:
+- treat the publication’s botanical hit list as the new universe;
+- return only botanical suppliers while presenting the result as the project-wide supplier map;
+- silently classify pure chemicals as “research reagents” and therefore not raw materials;
+- use the previous turn’s local list as the authoritative scope without a scope decision.
+
+### 14.3 User correction
+
+The user then says:
+
+> I did not ask to limit this to botanical raw materials.
+
+Expected behavior:
+- recognize this as a **scope correction**;
+- restore the prior Scope Anchor;
+- update durable current-state / issue notes;
+- relabel earlier botanical-only output as a subset pass;
+- continue future work from the restored full universe.
+
+### 14.4 Failure conditions
+
+The Research Core process fails if it:
+1. allows a working subset to silently replace the Scope Anchor,
+2. calls a subset pass a full audit,
+3. turns a schema/storage category into an exclusion criterion,
+4. repeats the same narrower scope after an explicit user correction,
+5. fails to persist the corrected scope in durable project state.
