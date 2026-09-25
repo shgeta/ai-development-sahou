@@ -1,6 +1,6 @@
 # AI共通仕様 / GitHub / AISPEC セット README
 
-- Updated: 2026-09-24
+- Updated: 2026-09-25
 - Scope: AI/人間がGitHub repository上で仕様を読み、作業し、commit/CIまで安全に進めるための共通仕様セット
 - Library folder: `/AI共通仕様_GitHub_AISPEC/`
 
@@ -14,7 +14,7 @@
 2. GitHub上の作業をどう開始・記録・commit・CI・引継ぎするか
 3. large text / 複数file / 長時間validationをどう安全にcommitするか
 4. Safe Commit Engineを実際にどう使うか
-
+5. production Web siteの変更履歴をどうappend-onlyで追跡するか
 
 ## 1.1 Public-safe by construction
 
@@ -39,10 +39,11 @@ AISPECは単一fileを正本とする文書ではなく、SEARCH + specification
 1. `AISPEC_AI仕様記述共通仕様_v1.2.md`
 2. `GITHUB_AI作業運用共通仕様_v1.15.md`
 3. project固有のcurrent spec / project固有authority / Open Issue
-4. Safe Commit Engineの発動条件に該当する場合のみ `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md`
-5. 実際のCLI / workflow操作が必要な場合 `GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md`
+4. production Web site更新を扱う場合 `WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md`
+5. Safe Commit Engineの発動条件に該当する場合のみ `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md`
+6. 実際のCLI / workflow操作が必要な場合 `GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md`
 
-Safe Commit Engineを使わない通常の小commitでは、4→5を必須とはしない。project固有のcurrent spec / project固有authority / Open Issue確認は省略しない。Hidden Fact Registryは解析系projectで利用できる任意のproject固有authorityであり、全projectの必須構造ではない。
+Safe Commit Engineを使わない通常の小commitでは、5→6を必須とはしない。project固有のcurrent spec / project固有authority / Open Issue確認は省略しない。Hidden Fact Registryは解析系projectで利用できる任意のproject固有authorityであり、全projectの必須構造ではない。
 
 ## 3. 各ファイルのauthority
 
@@ -50,6 +51,7 @@ Safe Commit Engineを使わない通常の小commitでは、4→5を必須とは
 |---|---|---|---|
 | `AISPEC_AI仕様記述共通仕様_v1.2.md` | 仕様記述・解釈の共通形式 | 仕様の意味構造 | RULE_ID / TYPE / MEANING / SCOPE / TARGET / CLOSURE / ORDER / DEPENDS_ON / SOURCE / DECISION_REF 等 |
 | `GITHUB_AI作業運用共通仕様_v1.15.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
+| `WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md` | Web本番更新ログ | production update history | append-only event / deployment identity / outcome / rollback / correction / validation evidence |
 | `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md` | Safe Commit Engineの規範仕様 | large/multi-file commit transaction | parallel prepare / HEAD guard / hash / allowlist / validation / single commit |
 | `GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md` | 実装・操作Reference | 非規範の実行説明 | CLI / GitHub Actions / executor / performance observation / limitation |
 
@@ -63,25 +65,13 @@ repositoryのIssue運用やcommit手順そのものは `GITHUB_AI作業運用共
 
 ### GitHub AI作業運用
 
-GitHub作業では原則として以下をauthorityとする。
+GitHub作業では `GITHUB_AI作業運用共通仕様_v1.15.md` をauthorityとする。Issue / branch / commit / CI / restartabilityを扱う。
 
-- 1作業テーマ = 1 Issue
-- AISPECはcurrent semantic authority、Issueはcanonical change unit / semantic decision history、commit/PRはexact diffとする
-- semantic changeはIssueなしのcommitだけで完結させず、AISPEC `DECISION_REF` ↔ Issue affected RULE_IDを双方向に追跡可能にする
-- Issueで作業branch / HEADを確定し、書込み前に現在のcheckout branchとの一致を確認する。local worktree pathはhandoff authorityにしない
-- branchを作成した場合はIssueに Branch Class / Merge Intent / Branch State / Review or Expiry / Keep or Drop Ruleを記録し、mergeするbranchと捨ててよいbranchを明示する
-- 新branch作成前にBranch Drain Gateを行い、MERGE_READYなbranchを先に閉じる。Library Current Stateにはactive branch inventoryとmerge orderをmirrorする
-- HANDOFF専用commitを作らない
-- 重要checkpointはIssueコメントへ残す
-- repository / current spec / current Issueを古い会話より優先する
-- tests / CIをcommit SHAまで追跡する
-- containerの外部アクセス制限時はGitHub Actionsで取得し、repository全体・巨大fileを含めartifactとして回収して作業継続する
-- 重いlocal commandは安全に分離・並行実行し、待ち時間中に依存しない作業を進める
-- pytestはすべての実行経路でproject固有の `PYTHONPATH` を明示し、canonical値をBOOTSTRAPへ記録する
-- projectの継続作業に必要な固定情報を追加・変更した場合、同じ変更単位でPROJECT BOOTSTRAPから到達可能にする
-- Libraryへ保存するuser受領データはrepository / project単位の専用folderへ集約し、同一案件で再利用する
-- GitHub repository全体の再利用snapshotは `/GitHubRepos/<owner>__<repo>/repo-snapshots/` にexact SHA/hash/manifest付きで保持し、artifactは原則30日、Libraryはcurrent + previous 1世代でrotationする
-- project全体とactive Issueのcurrent focus / 順序 / blocker / nextはLibrary Current Stateで共有してよいが、Issueにできる大きさの作業はIssueを主としSTATEだけで抱え続けない
+### Web Site Update Log
+
+production Web siteの状態変更は `WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md` をauthorityとし、Issue / PR / commit / CIだけへ履歴を分散させず、canonical append-only event streamから本番更新履歴を追跡可能にする。
+
+read-only preflightはproduction updateそのものではないが、update eventのvalidation evidenceとして参照してよい。
 
 ### Safe Commit Engine
 
@@ -112,7 +102,7 @@ commit/refを動かすfinal transaction自体は並列化しない。
 
 1. repositoryのcurrent spec / project固有authority
 2. current Open Issueで明示された作業Scope・Acceptance criteria・設計判断
-3. 対象処理に特化した共通仕様（例: `GITHUB_SAFE_COMMIT_ENGINE_AISPEC`）
+3. 対象処理に特化した共通仕様（例: `WEB_SITE_UPDATE_LOG`, `GITHUB_SAFE_COMMIT_ENGINE_AISPEC`）
 4. 一般的なGitHub作業運用仕様
 5. AISPEC共通記述形式
 6. Reference / example / 非規範の性能観測
@@ -127,6 +117,12 @@ GitHubを継続作業に使うprojectでは、PROJECT BOOTSTRAPから最低限�
 ```text
 AISPEC_AI仕様記述共通仕様_v1.2.md
 GITHUB_AI作業運用共通仕様_v1.15.md
+```
+
+production Web site更新を扱うprojectでは次も参照する。
+
+```text
+WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md
 ```
 
 Safe Commit Engineを導入しているrepositoryでは、必要に応じて次も参照する。
@@ -149,12 +145,17 @@ GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md
 ## 8. 現行セット
 
 ```text
-/AI共通仕様_GitHub_AISPEC/
-├── 00_README_共通仕様セット.md
-├── AISPEC_AI仕様記述共通仕様_v1.2.md
-├── GITHUB_AI作業運用共通仕様_v1.15.md
-├── GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md
-└── GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md
+specs/
+├── README_共通仕様セット.md
+├── aispec/
+│   └── AISPEC_AI仕様記述共通仕様_v1.2.md
+├── github/
+│   └── GITHUB_AI作業運用共通仕様_v1.15.md
+├── web/
+│   └── WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md
+└── safe-commit/
+    ├── GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md
+    └── GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md
 ```
 
 このREADMEは入口・routing用であり、各仕様本文の意味を置き換えない。

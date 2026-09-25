@@ -13,6 +13,7 @@ AIと人間が継続的に開発するための、仕様記述・作業管理・
 - **Work Item / Issue**: 議題・判断・成功/失敗を含む履歴の正本
 - **Current State / Status**: activeな現在地・focus・blocker・nextの補助盤
 - **Adapter**: ChatGPTやGitHub等の製品固有機能を、製品非依存の論理役割へ対応付ける
+- **Web Site Update Log**: production Web siteの変更をappend-only event streamとして追跡する
 - **Safe Commit Engine**: 大きな変更をfull-file replacementに頼らず、安全なpatch bundleとして適用する
 
 ## 基本フロー
@@ -27,6 +28,8 @@ conversation
        -> versioned repository / commit
   -> validation evidence
        -> CI / tests / Work Item
+  -> production web mutation
+       -> Web Site Update Log
 ```
 
 Work Itemは成功時だけ残すものではありません。失敗・却下・中止・保留・no-change・調査のみの場合も、議題として扱った履歴として保持します。
@@ -47,6 +50,9 @@ Work Itemは成功時だけ残すものではありません。失敗・却下�
 - [Conversation-to-Authority Sync](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_CONVERSATION_SYNC.md)
 - [Status + Issue Binding](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_STATUS_ISSUE_BINDING.md)
 - [Issue Outcome Retention](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_ISSUE_OUTCOME_RETENTION.md)
+
+### Web運用
+- [Web Site Update Log 共通仕様 v1.0](specs/web/WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md)
 
 ### Research
 - [Research Core v0.1](specs/research-evidence/RESEARCH_CORE_v0.1.md)
@@ -70,7 +76,6 @@ Coreでは `Persistent Project Store`、`Versioned Repository`、`Work Item Trac
 
 具体的な製品を使う場合はAdapterで対応付けます。たとえば、利用可能なChatGPT環境では `Persistent Project Store` を **ChatGPT Library** に、GitHubを使う環境では `Work Item Tracker` を **GitHub Issues** に対応付けます。
 
-
 ## 毎回の開発開始
 
 各projectは、SAHOU全文をproject内へ複製せず、[PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md) から共通SAHOUを参照します。
@@ -84,6 +89,7 @@ PROJECT_BOOTSTRAP
      -> HIT: 検証済みrepository snapshotをfull load
      -> MISS: current exact snapshotを再取得・検証・cache更新
   -> project固有spec / Current State / Open Work Item
+  -> production Web site更新projectなら Web Update Log entrypoint確認
   -> 開発開始
 ```
 
