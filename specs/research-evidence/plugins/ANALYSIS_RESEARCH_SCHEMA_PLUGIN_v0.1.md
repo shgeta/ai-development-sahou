@@ -155,7 +155,8 @@ Recommended qualifiers:
 - DERIVED_FROM_ID
 - EXACT_REVISION
 - CONTENT_HASH
-- AUTHORITATIVE = true|false
+
+`AUTHORITY_ROLE` is the single classification for authority position. Do not add a parallel `AUTHORITATIVE = true|false` flag that can disagree with the role/provenance graph.
 
 ## 8. Runtime fingerprint
 
