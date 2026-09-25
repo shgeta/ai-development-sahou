@@ -27,32 +27,48 @@
 - 共通仕様へ昇格させる場合は、project固有identifierを除去し、一般化したrule / patternだけを移す。
 - 「公開時に後で消す」運用を採用せず、常時public-safeであることを要求する。
 
-詳細なguardrailは `GITHUB_AI作業運用共通仕様_v1.15.md` の `Common specification public-safety rule` をauthorityとする。
+詳細なguardrailは `GITHUB_AI作業運用共通仕様_v1.16.md` の `Common specification public-safety rule` をauthorityとする。
 
 ### 1.2 AISPECのphysical model
 
 AISPECは単一fileを正本とする文書ではなく、SEARCH + specification closureで必要rule集合を復元するlogical distributed specification databaseとして扱う。physical fileはshardであり、既存recordのUPDATE/DELETEはPATCH、新規recordのまとまった追加はNEW SHARD、大規模semantic/schema再編はMIGRATION、意味を変えない物理整理はAISPEC Hygieneとする。routine full-file replacementは使用しない。
 
-## 2. 基本の読む順番
+## 2. Routed loading
 
-### GitHub repositoryで継続作業を始める場合
+SAHOUは原則として**全fileを毎回loadしない**。
 
-1. `AISPEC_AI仕様記述共通仕様_v1.2.md`
-2. `GITHUB_AI作業運用共通仕様_v1.15.md`
-3. project固有のcurrent spec / project固有authority / Open Issue
-4. production Web site更新を扱う場合 `WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md`
-5. Safe Commit Engineの発動条件に該当する場合のみ `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md`
-6. 実際のCLI / workflow操作が必要な場合 `GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md`
+session開始時は次の順で必要moduleを決める。
 
-Safe Commit Engineを使わない通常の小commitでは、5→6を必須とはしない。project固有のcurrent spec / project固有authority / Open Issue確認は省略しない。Hidden Fact Registryは解析系projectで利用できる任意のproject固有authorityであり、全projectの必須構造ではない。
+1. `specs/README_共通仕様セット.md` をrouting indexとして読む。
+2. projectの `PROJECT_BOOTSTRAP` / current spec / Open Issue / taskを確認する。
+3. task triggerに一致するmoduleだけを選択する。
+4. 選択moduleが他moduleをdependencyとして要求する場合、そのclosureだけ追加loadする。
+5. 作業中に新しいtriggerが発生した時だけmoduleを追加する。
+6. exact-SHA cacheがrepository全体を保持していても、snapshot全体をcontextへ展開しない。
+
+### 2.1 Routing table
+
+| Trigger | Load |
+|---|---|
+| GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.16.md` |
+| AISPECの意味変更・closure・RULE_IDを扱う | AISPEC v1.2 + GitHub運用 |
+| durable logを設計・記録する | `LOG_CORE_v1.0.md` |
+| production Web update logを扱う | Log Core + `WEB_UPDATE_LOG_PLUGIN_v1.0.md` |
+| Researchを扱う | Research Core + taskに必要なResearch plugin |
+| Safe Commit発動条件に該当する | Safe Commit AISPEC、実操作時のみReference |
+| ChatGPT/GitHub等のproduct mappingが必要 | 対応Adapter |
+| 上記に該当しない | 無関係なoptional moduleをloadしない |
+
+project固有authority / Open Issue確認はroutingとは別に省略しない。
 
 ## 3. 各ファイルのauthority
 
 | FILE | ROLE | AUTHORITY | 主な対象 |
 |---|---|---|---|
 | `AISPEC_AI仕様記述共通仕様_v1.2.md` | 仕様記述・解釈の共通形式 | 仕様の意味構造 | RULE_ID / TYPE / MEANING / SCOPE / TARGET / CLOSURE / ORDER / DEPENDS_ON / SOURCE / DECISION_REF 等 |
-| `GITHUB_AI作業運用共通仕様_v1.15.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
-| `WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md` | Web本番更新ログ | production update history | append-only event / deployment identity / outcome / rollback / correction / validation evidence |
+| `GITHUB_AI作業運用共通仕様_v1.16.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
+| `LOG_CORE_v1.0.md` | Log Core | durable log共通作法 | append-only / event identity / correction / secret exclusion / persistence safety |
+| `WEB_UPDATE_LOG_PLUGIN_v1.0.md` | Web Update Log Plugin | production Web update history | deployment lifecycle / source / target / execution / validation / rollback |
 | `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md` | Safe Commit Engineの規範仕様 | large/multi-file commit transaction | parallel prepare / HEAD guard / hash / allowlist / validation / single commit |
 | `GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md` | 実装・操作Reference | 非規範の実行説明 | CLI / GitHub Actions / executor / performance observation / limitation |
 
@@ -86,11 +102,13 @@ GitHub作業では原則として以下をauthorityとする。
 - GitHub repository全体の再利用snapshotは `/GitHubRepos/<owner>__<repo>/repo-snapshots/` にexact SHA/hash/manifest付きで保持し、artifactは原則30日、Libraryはcurrent + previous 1世代でrotationする
 - project全体とactive Issueのcurrent focus / 順序 / blocker / nextはLibrary Current Stateで共有してよいが、Issueにできる大きさの作業はIssueを主としSTATEだけで抱え続けない
 
-### Web Site Update Log
+### Log Core / Plugins
 
-production Web siteの状態変更は `WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md` をauthorityとし、Issue / PR / commit / CIだけへ履歴を分散させず、canonical append-only event streamから本番更新履歴を追跡可能にする。
+Log Coreはdomain非依存のappend-only / correction / persistence / traceabilityを定義する。ログを扱うtaskでだけloadする。
 
-read-only preflightはproduction updateそのものではないが、update eventのvalidation evidenceとして参照してよい。
+production Web updateでは `LOG_CORE_v1.0.md` に加えて `WEB_UPDATE_LOG_PLUGIN_v1.0.md` をloadする。read-only preflightはproduction updateそのものではないが、後続deploymentのevidenceとして参照してよい。
+
+他domainのログ作法は将来別pluginとして追加し、Log Coreへdomain語彙を持ち込まない。
 
 ### Safe Commit Engine
 
@@ -121,7 +139,7 @@ commit/refを動かすfinal transaction自体は並列化しない。
 
 1. repositoryのcurrent spec / project固有authority
 2. current Open Issueで明示された作業Scope・Acceptance criteria・設計判断
-3. 対象処理に特化した共通仕様（例: `WEB_SITE_UPDATE_LOG`, `GITHUB_SAFE_COMMIT_ENGINE_AISPEC`）
+3. 対象処理に特化した共通仕様（例: `LOG_CORE` + selected plugin, `GITHUB_SAFE_COMMIT_ENGINE_AISPEC`）
 4. 一般的なGitHub作業運用仕様
 5. AISPEC共通記述形式
 6. Reference / example / 非規範の性能観測
@@ -131,27 +149,32 @@ commit/refを動かすfinal transaction自体は並列化しない。
 
 ## 6. PROJECT BOOTSTRAPからの参照
 
-GitHubを継続作業に使うprojectでは、PROJECT BOOTSTRAPから最低限次へ到達できるようにする。
+GitHubを継続作業に使うprojectでは、PROJECT_BOOTSTRAPへ `Load mode: routed` を記録する。
+
+Bootstrapは最低限次を明示する。
+
+- SAHOU repository / ref
+- routing index
+- GitHub work時のGitHub運用spec
+- projectで常用するoptional module
+- task条件付きで読むplugin / specialized spec
+- project固有authority / Current State / Work Item
+
+例:
 
 ```text
-AISPEC_AI仕様記述共通仕様_v1.2.md
-GITHUB_AI作業運用共通仕様_v1.15.md
+Required SAHOU modules:
+- specs/github/GITHUB_AI作業運用共通仕様_v1.16.md
+
+Conditional modules:
+- production web update:
+  - specs/log/LOG_CORE_v1.0.md
+  - specs/web/WEB_UPDATE_LOG_PLUGIN_v1.0.md
+- Safe Commit trigger:
+  - specs/safe-commit/GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md
 ```
 
-production Web site更新を扱うprojectでは次も参照する。
-
-```text
-WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md
-```
-
-Safe Commit Engineを導入しているrepositoryでは、必要に応じて次も参照する。
-
-```text
-GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md
-GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md
-```
-
-全文を各projectへ複製するのではなく、authorityへの参照を持たせる。
+全文を各projectへ複製せず、必要moduleへの参照を持たせる。
 
 ## 7. Version / history運用
 
@@ -169,12 +192,19 @@ specs/
 ├── aispec/
 │   └── AISPEC_AI仕様記述共通仕様_v1.2.md
 ├── github/
-│   └── GITHUB_AI作業運用共通仕様_v1.15.md
+│   └── GITHUB_AI作業運用共通仕様_v1.16.md
+├── log/
+│   └── LOG_CORE_v1.0.md
 ├── web/
-│   └── WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md
+│   ├── WEB_UPDATE_LOG_PLUGIN_v1.0.md
+│   └── WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md  # deprecated legacy entrypoint
+├── platform/
+│   └── SAHOU_SHARED_CACHE_CONTRACT_v1.1.md
 └── safe-commit/
     ├── GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md
     └── GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md
 ```
+
+Research / Adapter等はtask trigger時にroutingして読む。
 
 このREADMEは入口・routing用であり、各仕様本文の意味を置き換えない。

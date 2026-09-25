@@ -13,7 +13,8 @@ AIと人間が継続的に開発するための、仕様記述・作業管理・
 - **Work Item / Issue**: 議題・判断・成功/失敗を含む履歴の正本
 - **Current State / Status**: activeな現在地・focus・blocker・nextの補助盤
 - **Adapter**: ChatGPTやGitHub等の製品固有機能を、製品非依存の論理役割へ対応付ける
-- **Web Site Update Log**: production Web siteの変更をappend-only event streamとして追跡する
+- **Log Core**: domain非依存のappend-only / correction / persistence / traceability作法
+- **Log Plugin**: Web update等、必要なdomainだけCoreへ追加する
 - **Safe Commit Engine**: 大きな変更をfull-file replacementに頼らず、安全なpatch bundleとして適用する
 
 ## 基本フロー
@@ -28,8 +29,8 @@ conversation
        -> versioned repository / commit
   -> validation evidence
        -> CI / tests / Work Item
-  -> production web mutation
-       -> Web Site Update Log
+  -> durable loggingが必要な場合
+       -> Log Core + selected plugin
 ```
 
 Work Itemは成功時だけ残すものではありません。失敗・却下・中止・保留・no-change・調査のみの場合も、議題として扱った履歴として保持します。
@@ -42,17 +43,20 @@ Work Itemは成功時だけ残すものではありません。失敗・却下�
 - [AI開発基盤抽象化 共通仕様 v1.0](specs/platform/AI開発基盤抽象化共通仕様_v1.0.md)
 
 ### Adapters
-- [ChatGPT Adapter v1.0](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.0.md)
+- [ChatGPT Adapter v1.1](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.1.md)
 - [GitHub Adapter v1.0](adapters/github/GITHUB_ADAPTER_共通仕様_v1.0.md)
 
 ### GitHub運用
-- [GitHub AI作業運用 共通仕様 v1.15](specs/github/GITHUB_AI作業運用共通仕様_v1.15.md)
+- [GitHub AI作業運用 共通仕様 v1.16](specs/github/GITHUB_AI作業運用共通仕様_v1.16.md)
 - [Conversation-to-Authority Sync](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_CONVERSATION_SYNC.md)
 - [Status + Issue Binding](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_STATUS_ISSUE_BINDING.md)
 - [Issue Outcome Retention](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_ISSUE_OUTCOME_RETENTION.md)
 
+### Log
+- [Log Core v1.0](specs/log/LOG_CORE_v1.0.md)
+
 ### Web運用
-- [Web Site Update Log 共通仕様 v1.0](specs/web/WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md)
+- [Web Update Log Plugin v1.0](specs/web/WEB_UPDATE_LOG_PLUGIN_v1.0.md)
 
 ### Research
 - [Research Core v0.1](specs/research-evidence/RESEARCH_CORE_v0.1.md)
@@ -85,21 +89,21 @@ Coreでは `Persistent Project Store`、`Versioned Repository`、`Work Item Trac
 ```text
 PROJECT_BOOTSTRAP
   -> SAHOU main exact SHA確認
-  -> 全開発共有のexact-SHA cacheをresolve
-     -> HIT: 検証済みrepository snapshotをfull load
-     -> MISS: current exact snapshotを再取得・検証・cache更新
-  -> project固有spec / Current State / Open Work Item
-  -> production Web site更新projectなら Web Update Log entrypoint確認
+  -> shared exact-SHA snapshotをresolve / integrity確認
+  -> routing indexを読む
+  -> project固有spec / Current State / Open Work Itemを確認
+  -> taskに必要なSAHOU moduleを選ぶ
+  -> selected module + dependency closureだけcontextへload
   -> 開発開始
 ```
 
 shared cacheはSAHOUのauthorityではありません。authorityはGitHub repositoryのref / exact commit / treeです。
 
-- [SAHOU Shared Cache Contract v1.0](specs/platform/SAHOU_SHARED_CACHE_CONTRACT_v1.0.md)
+- [SAHOU Shared Cache Contract v1.1](specs/platform/SAHOU_SHARED_CACHE_CONTRACT_v1.1.md)
 - [PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md)
 - [snapshot manifest tool](tools/sahou_snapshot_manifest.py)
 
-`SAHOU_FULL.md` のような派生統合fileは作りません。cacheはexact repository snapshotそのものを保持します。
+`SAHOU_FULL.md` のような派生統合fileは作りません。cacheはexact repository snapshotそのものを保持できますが、session contextへはroutingで選ばれたmoduleだけを展開します。
 
 ## SAHOU自体の開発
 
