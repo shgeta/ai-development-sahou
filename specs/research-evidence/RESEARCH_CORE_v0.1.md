@@ -109,6 +109,7 @@ Plugins / Profiles add semantics only when a research domain or method repeatedl
 Examples:
 
 - Paper Research Plugin
+- Analysis Research Plugin
 - Patent Research Plugin
 - regulatory-source plugin
 - clinical / toxicology / chemistry domain profile
@@ -124,7 +125,32 @@ A Plugin may add:
 
 A Plugin MUST NOT redefine Research as only source search, only literature review, or only numerical analytics.
 
-## 6. Relationship with Paper Research
+## 6. Relationship with Analysis Research
+
+Analysis Research is the standard Plugin for source-backed analysis, comparison, diagnostic classification, runtime-sensitive validation, and mixed empirical/computational evidence.
+
+It generalizes reusable lessons from implementation reconstruction and visual/source analysis without making Figma, browser rendering, screenshots, or any one tool a universal Research Core requirement.
+
+Typical Analysis Research flow:
+
+```text
+source closure
+  -> deterministic facts / runtime readiness
+  -> localized analysis
+  -> observation
+  -> difference / cause assessment
+  -> triangulation when needed
+  -> synthesis
+```
+
+Analysis Research keeps:
+- source authority separate from derived artifacts,
+- raw observation separate from interpretation,
+- deterministic validation ahead of perceptual QA where possible,
+- unresolved findings as explicit UNKNOWN / REVIEW_REQUIRED,
+- exact source/runtime generation identity attached to reproducibility-sensitive results.
+
+## 7. Relationship with Paper Research
 
 Paper Research is one research path.
 
@@ -149,7 +175,7 @@ A research question may therefore combine:
 - experiment results,
 without creating separate top-level research authorities.
 
-## 7. Relationship with AISPEC
+## 8. Relationship with AISPEC
 
 Research Core answers:
 
@@ -176,7 +202,7 @@ Research QUESTION
   -> AISPEC update when current project meaning changes
 ```
 
-## 8. Boundary with Work Item Tracker
+## 9. Boundary with Work Item Tracker
 
 Work Item / Issue remains the history of the research task:
 
@@ -190,7 +216,7 @@ Research Core stores durable research semantics when they need to be searched, c
 
 Routine transient exploration does not need to become a durable research record.
 
-## 9. Closure
+## 10. Closure
 
 Research closure begins from the active research seed and follows only explicit required relations plus active Plugin closure rules.
 
@@ -220,7 +246,7 @@ Mixed closures are normal.
 
 A research task MUST NOT be forced to load all literature, all datasets, all analytics records, or the entire evidence graph.
 
-## 10. Validation principles
+## 11. Validation principles
 
 A Research Core implementation should preserve at least these distinctions:
 
@@ -235,13 +261,14 @@ A Research Core implementation should preserve at least these distinctions:
 - Research != Literature Research only
 - Research != Analytics only
 
-## 11. Current architecture
+## 12. Current architecture
 
 ```text
 SAHOU
   -> Research Core
        -> Research Evidence Core
        -> Paper Research Plugin
+       -> Analysis Research Plugin
        -> future compatible research/domain plugins
   -> AISPEC
   -> Work Item / Issue
