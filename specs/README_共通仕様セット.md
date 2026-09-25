@@ -27,7 +27,7 @@
 - 共通仕様へ昇格させる場合は、project固有identifierを除去し、一般化したrule / patternだけを移す。
 - 「公開時に後で消す」運用を採用せず、常時public-safeであることを要求する。
 
-詳細なguardrailは `GITHUB_AI作業運用共通仕様_v1.15.md` の `Common specification public-safety rule` をauthorityとする。
+詳細なguardrailは `GITHUB_AI作業運用共通仕様_v1.16.md` の `Common specification public-safety rule` をauthorityとする。
 
 ### 1.2 AISPECのphysical model
 
@@ -50,7 +50,7 @@ session開始時は次の順で必要moduleを決める。
 
 | Trigger | Load |
 |---|---|
-| GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.15.md` |
+| GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.16.md` |
 | AISPECの意味変更・closure・RULE_IDを扱う | AISPEC v1.2 + GitHub運用 |
 | durable logを設計・記録する | `LOG_CORE_v1.0.md` |
 | production Web update logを扱う | Log Core + `WEB_UPDATE_LOG_PLUGIN_v1.0.md` |
@@ -66,7 +66,7 @@ project固有authority / Open Issue確認はroutingとは別に省略しない�
 | FILE | ROLE | AUTHORITY | 主な対象 |
 |---|---|---|---|
 | `AISPEC_AI仕様記述共通仕様_v1.2.md` | 仕様記述・解釈の共通形式 | 仕様の意味構造 | RULE_ID / TYPE / MEANING / SCOPE / TARGET / CLOSURE / ORDER / DEPENDS_ON / SOURCE / DECISION_REF 等 |
-| `GITHUB_AI作業運用共通仕様_v1.15.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
+| `GITHUB_AI作業運用共通仕様_v1.16.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
 | `LOG_CORE_v1.0.md` | Log Core | durable log共通作法 | append-only / event identity / correction / secret exclusion / persistence safety |
 | `WEB_UPDATE_LOG_PLUGIN_v1.0.md` | Web Update Log Plugin | production Web update history | deployment lifecycle / source / target / execution / validation / rollback |
 | `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md` | Safe Commit Engineの規範仕様 | large/multi-file commit transaction | parallel prepare / HEAD guard / hash / allowlist / validation / single commit |
@@ -164,7 +164,7 @@ Bootstrapは最低限次を明示する。
 
 ```text
 Required SAHOU modules:
-- specs/github/GITHUB_AI作業運用共通仕様_v1.15.md
+- specs/github/GITHUB_AI作業運用共通仕様_v1.16.md
 
 Conditional modules:
 - production web update:
@@ -192,7 +192,7 @@ specs/
 ├── aispec/
 │   └── AISPEC_AI仕様記述共通仕様_v1.2.md
 ├── github/
-│   └── GITHUB_AI作業運用共通仕様_v1.15.md
+│   └── GITHUB_AI作業運用共通仕様_v1.16.md
 ├── log/
 │   └── LOG_CORE_v1.0.md
 ├── web/

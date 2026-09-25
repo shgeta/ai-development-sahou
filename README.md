@@ -43,11 +43,11 @@ Work Itemは成功時だけ残すものではありません。失敗・却下�
 - [AI開発基盤抽象化 共通仕様 v1.0](specs/platform/AI開発基盤抽象化共通仕様_v1.0.md)
 
 ### Adapters
-- [ChatGPT Adapter v1.0](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.0.md)
+- [ChatGPT Adapter v1.1](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.1.md)
 - [GitHub Adapter v1.0](adapters/github/GITHUB_ADAPTER_共通仕様_v1.0.md)
 
 ### GitHub運用
-- [GitHub AI作業運用 共通仕様 v1.15](specs/github/GITHUB_AI作業運用共通仕様_v1.15.md)
+- [GitHub AI作業運用 共通仕様 v1.16](specs/github/GITHUB_AI作業運用共通仕様_v1.16.md)
 - [Conversation-to-Authority Sync](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_CONVERSATION_SYNC.md)
 - [Status + Issue Binding](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_STATUS_ISSUE_BINDING.md)
 - [Issue Outcome Retention](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_ISSUE_OUTCOME_RETENTION.md)

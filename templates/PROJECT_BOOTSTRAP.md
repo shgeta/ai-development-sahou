@@ -29,7 +29,7 @@
 
 ### Required for GitHub work
 
-- `specs/github/GITHUB_AI作業運用共通仕様_v1.15.md`
+- `specs/github/GITHUB_AI作業運用共通仕様_v1.16.md`
 
 ### Conditional
 
