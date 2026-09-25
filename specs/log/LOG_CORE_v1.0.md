@@ -10,7 +10,7 @@
 
 Log Coreは「何をログにするか」をdomainごとに決めない。
 
-Web deployment、Research、Data update、業務処理などがdurable logを必要とするときに、記録の壊れにくさ・訂正可能性・追跡可能性だけを共通化する。
+各domainがdurable logを必要とするときに、記録の壊れにくさ・訂正可能性・追跡可能性だけを共通化する。
 
 domain固有のevent type、必須field、成功条件、対象identityはpluginまたはproject authorityが定義する。
 
@@ -66,7 +66,7 @@ Pluginは少なくとも次を定義する。
 - validation / evidence semantics
 - project Bootstrapに必要な追加entrypoint
 
-Log Core自身にはWeb、deployment、Kinsta、Research等のdomain語彙を入れない。
+Log Core自身には個別domain / provider固有の語彙・event・fieldを入れない。
 
 ## 4. Load rule
 
