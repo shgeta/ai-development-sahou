@@ -52,6 +52,7 @@ Work Itemは成功時だけ残すものではありません。失敗・却下�
 - [Research Core v0.1](specs/research-evidence/RESEARCH_CORE_v0.1.md)
 - [Research Evidence Core Schema v0.1](specs/research-evidence/RESEARCH_EVIDENCE_CORE_SCHEMA_v0.1.md)
 - [Paper Research Schema Plugin v0.1](specs/research-evidence/plugins/PAPER_RESEARCH_SCHEMA_PLUGIN_v0.1.md)
+- [Analysis Research Schema Plugin v0.1](specs/research-evidence/plugins/ANALYSIS_RESEARCH_SCHEMA_PLUGIN_v0.1.md)
 - [Synthetic Research Stress Test v0.1](specs/research-evidence/examples/RESEARCH_EVIDENCE_SYNTHETIC_STRESS_TEST_v0.1.md)
 
 Researchは文献検索だけを指しません。source research、empirical investigation、data/code/log/visual analytics、evidence evaluation、synthesisを含む上位概念です。AnalyticsはResearch内のACTIVITYとして扱います。
