@@ -321,3 +321,128 @@ The schema fails if it:
 3. treats an analytic output as automatically proving a proposition,
 4. cannot combine paper evidence and empirical analytics in one closure,
 5. treats every data/code/log/image field as universal Research Core columns.
+
+
+## 13. Source-backed implementation analysis stress test
+
+A synthetic design/source system is reconstructed into a browser/runtime implementation.
+
+Available evidence:
+- exact structural source with nested references and inherited properties,
+- generated normalized source model,
+- implementation candidate,
+- browser runtime output,
+- screenshot/reference render,
+- two independent renderers with slightly different antialiasing behavior.
+
+Research question:
+
+`Q.003` — Is the observed visual residual caused by a source/implementation defect or by renderer/runtime behavior?
+
+### 13.1 Source closure gate
+
+Before visual comparison:
+- descendant/source-reference closure must resolve,
+- effective inherited/overridden properties must resolve,
+- unresolved dependencies remain explicit,
+- deterministic source facts must not be rediscovered from screenshot evidence.
+
+Expected behavior:
+- incomplete source closure produces SOURCE_PARTIAL / REVIEW_REQUIRED,
+- downstream pixel comparison cannot convert incomplete closure into SOURCE_CLOSED.
+
+### 13.2 Authority separation
+
+Records distinguish:
+- original source revision,
+- deterministic normalized/derived source representation,
+- implementation candidate,
+- browser/runtime capture,
+- diagnostic diff artifact.
+
+Expected behavior:
+- generated reference and screenshot remain validation/diagnostic evidence,
+- neither silently replaces the original source as authority.
+
+### 13.3 Runtime fingerprint
+
+A runtime validation ACTIVITY records enough identity to reproduce the observation, including:
+- runtime/browser version,
+- viewport/input shape,
+- device scale or equivalent,
+- required resource readiness,
+- source/candidate revision.
+
+Expected behavior:
+- a result captured before a required resource is ready cannot be promoted to READY merely because static configuration declared that resource.
+
+### 13.4 Localize before correction
+
+A global difference metric fails.
+
+The analysis then localizes:
+- page/system,
+- region/component,
+- source owner,
+- primitive/property,
+- residual shape.
+
+Expected behavior:
+- no global compensating correction is adopted before the defect is bounded,
+- a localized blocking defect is not erased by an acceptable global score.
+
+### 13.5 Deterministic gate before perceptual QA
+
+Source-deterministic properties are checked first.
+
+Only remaining residuals are sent to perceptual/rendering analysis.
+
+Expected behavior:
+- exact source geometry/material/configuration mismatch is classified before pixel tuning,
+- antialiasing/subpixel residual remains a renderer/runtime question when deterministic facts already match.
+
+### 13.6 Triangulation
+
+Two independent renderers disagree slightly near the same edge while source and implementation geometry/material agree.
+
+Expected assessment:
+- renderer-specific or toolchain-specific residual may be favored,
+- but agreement between derived renderers does not overrule the original source.
+
+### 13.7 Threshold discipline
+
+A comparison threshold fails for one localized region.
+
+Expected behavior:
+- threshold is not widened solely to turn FAIL into PASS,
+- threshold changes require explicit method rationale and invalidate affected prior comparisons.
+
+### 13.8 Generation coherence
+
+The implementation candidate is compared against a stale reference from another source generation.
+
+Expected behavior:
+- comparison result is invalidated,
+- the stale metric is not optimized further.
+
+### 13.9 Dedupe vs occurrence identity
+
+Two source occurrences share the same reusable visual/material fingerprint but use different placement/context.
+
+Expected behavior:
+- reusable material may be deduplicated,
+- occurrence identity and occurrence-level validation remain distinct,
+- cache key includes every usage parameter that can alter the result.
+
+### 13.10 Failure conditions
+
+The schema/plugin fails if it:
+1. uses screenshot QA to infer source facts that were structurally available,
+2. promotes a generated diagnostic artifact to source authority,
+3. loses unresolved dependencies during source closure,
+4. treats runtime-declared configuration as equivalent to runtime-ready state,
+5. applies a global correction before localizing the defect,
+6. widens tolerance only to make a failure pass,
+7. accepts stale-generation comparison metrics,
+8. deduplicates source occurrences together with reusable material,
+9. converts UNKNOWN / REVIEW_REQUIRED residuals into implementation defects without evidence.
