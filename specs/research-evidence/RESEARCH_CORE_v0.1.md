@@ -80,6 +80,46 @@ Not every research task requires every step.
 
 Exploratory work may begin from an ENTITY, SOURCE, anomaly, dataset, code path, visual difference, or other seed and later create a QUESTION.
 
+## 3.1 Scope anchor and scope-drift guardrail
+
+Each active research QUESTION SHOULD maintain a **Scope Anchor**: the current authoritative definition of the research universe, inclusion/exclusion boundary, and decision target.
+
+Examples:
+- all formulation-ready raw-material candidates;
+- all implementations under a named runtime;
+- all publications satisfying a stated population/intervention criterion.
+
+A Scope Anchor is not replaced merely because the current activity is narrower.
+
+Rules:
+
+1. A source subset, search result set, paper-specific candidate list, plugin output, or local work queue is a **working subset**, not a new research universe.
+2. A working subset MUST NOT silently replace the Scope Anchor.
+3. A follow-up such as “find suppliers”, “compare products”, “validate implementations”, or “continue the search” MUST resolve its target set from the Scope Anchor unless the user explicitly narrows scope.
+4. If only a subset is being processed, the activity/output MUST be labeled as a subset pass and MUST NOT be presented as a complete audit of the anchored universe.
+5. Classification convenience MUST NOT become an implicit exclusion rule. Examples:
+   - pure compound != research-only by definition;
+   - extract != the definition of raw material;
+   - one paper’s botanical candidates != all candidates;
+   - one tool’s supported entities != the research universe.
+6. When the user corrects scope, that correction SHOULD update durable current-state records / plan / issue notes so later turns do not regress to the prior scope.
+7. Before changing the candidate universe, distinguish:
+   - **scope decision**: intentional change to the Scope Anchor;
+   - **subset activity**: temporary narrowing for one pass;
+   - **evidence result**: findings from that subset.
+
+### Scope-drift check
+
+Before presenting a “complete”, “overall”, “all candidates”, “master”, or equivalent synthesis, verify:
+
+- What is the current Scope Anchor?
+- Did the current activity cover the entire anchored universe?
+- If not, is the result clearly labeled as partial/subset?
+- Did any recent source or paper accidentally redefine the candidate universe?
+- Did a storage or schema category accidentally become an inclusion/exclusion criterion?
+
+Failure to preserve this distinction is a research-process error even when every individual fact is correct.
+
 ## 4. Evidence semantics
 
 Research Core uses Research Evidence Core as the common evidence/provenance model.
@@ -260,6 +300,9 @@ A Research Core implementation should preserve at least these distinctions:
 - analysis method != research question
 - Research != Literature Research only
 - Research != Analytics only
+- working subset != Scope Anchor
+- source-specific candidate set != research universe
+- classification convenience != exclusion criterion
 
 ## 12. Current architecture
 
