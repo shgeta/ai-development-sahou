@@ -1,6 +1,6 @@
 # AI共通仕様 / GitHub / AISPEC セット README
 
-- Updated: 2026-09-25
+- Updated: 2026-09-29
 - Scope: AI/人間がGitHub repository上で仕様を読み、作業し、commit/CIまで安全に進めるための共通仕様セット
 - Library folder: `/AI共通仕様_GitHub_AISPEC/`
 
@@ -54,7 +54,9 @@ session開始時は次の順で必要moduleを決める。
 | AISPECの意味変更・closure・RULE_IDを扱う | AISPEC v1.2 + GitHub運用 |
 | durable logを設計・記録する | `LOG_CORE_v1.0.md` |
 | production Web update logを扱う | Log Core + `WEB_UPDATE_LOG_PLUGIN_v1.0.md` |
-| Researchを扱う | Research Core + taskに必要なResearch plugin |
+| Researchを扱う | Research Core + Research Evidence Core + taskに必要なResearch plugin |
+| 化学物質のidentity / transformation / degradation / stabilityを扱う | Research Core + Research Evidence Core + `specs/research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
+| 原料としての用途・目的機能・処方適性・sourcing/commercial評価を扱う | Chemical Research dependency closure + `specs/research-evidence/plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
 | Safe Commit発動条件に該当する | Safe Commit AISPEC、実操作時のみReference |
 | ChatGPT/GitHub等のproduct mappingが必要 | 対応Adapter |
 | 上記に該当しない | 無関係なoptional moduleをloadしない |
@@ -71,6 +73,8 @@ project固有authority / Open Issue確認はroutingとは別に省略しない�
 | `WEB_UPDATE_LOG_PLUGIN_v1.0.md` | Web Update Log Plugin | production Web update history | deployment lifecycle / source / target / execution / validation / rollback |
 | `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md` | Safe Commit Engineの規範仕様 | large/multi-file commit transaction | parallel prepare / HEAD guard / hash / allowlist / validation / single commit |
 | `GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md` | 実装・操作Reference | 非規範の実行説明 | CLI / GitHub Actions / executor / performance observation / limitation |
+| `specs/research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` | Chemical Research Plugin | chemical species / transformation / degradation / stability semantics | species identity / derivative-reference relation / product formation / mass balance / structural motif retention |
+| `specs/research-evidence/plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` | Raw Material Research Plugin | intended-use evaluation layered on Chemical Research | intended function / formulation suitability / functional consequence / supplier / sourcing / commercial interpretation |
 
 ## 4. authorityの境界
 
@@ -109,6 +113,25 @@ Log Coreはdomain非依存のappend-only / correction / persistence / traceabili
 production Web updateでは `LOG_CORE_v1.0.md` に加えて `WEB_UPDATE_LOG_PLUGIN_v1.0.md` をloadする。read-only preflightはproduction updateそのものではないが、後続deploymentのevidenceとして参照してよい。
 
 他domainのログ作法は将来別pluginとして追加し、Log Coreへdomain語彙を持ち込まない。
+
+### Research Evidence domain Plugins
+
+Chemical / raw-material research uses an explicit nested dependency:
+
+```text
+Research Core
+  -> Research Evidence Core
+       -> Chemical Research Plugin
+            -> Raw Material Research Plugin
+```
+
+- Chemical Research is value-neutral about intended use: it records species identity, transformation, product formation, mass balance, motif retention, and condition-qualified chemical stability.
+- Raw Material Research adds use-context semantics such as intended function, formulation suitability, functional consequence, supplier/specification evidence, sourcing, regulatory applicability, and commercial interpretation.
+- Selecting Raw Material Research MUST load Chemical Research through dependency closure.
+- Selecting Chemical Research alone MUST NOT load Raw Material Research.
+- Physical folder nesting is for discoverability only; the plugin metadata defines semantic dependency.
+
+Paper / Analysis plugins remain orthogonal and are loaded only when their trigger is present.
 
 ### Safe Commit Engine
 
@@ -204,6 +227,19 @@ specs/
     ├── GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md
     └── GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md
 ```
+
+Research Evidence domain plugins currently include:
+
+```text
+specs/research-evidence/plugins/
+├── PAPER_RESEARCH_SCHEMA_PLUGIN_v0.1.md
+├── ANALYSIS_RESEARCH_SCHEMA_PLUGIN_v0.1.md
+└── chemical/
+    ├── CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md
+    └── RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md
+```
+
+Raw Material is semantically nested under Chemical by explicit dependency, not by folder position alone.
 
 Research / Adapter等はtask trigger時にroutingして読む。
 

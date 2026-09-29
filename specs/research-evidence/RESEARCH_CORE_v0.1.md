@@ -110,9 +110,11 @@ Examples:
 
 - Paper Research Plugin
 - Analysis Research Plugin
+- Chemical Research Plugin
+- nested Raw Material Research Plugin (depends on Chemical Research)
 - Patent Research Plugin
 - regulatory-source plugin
-- clinical / toxicology / chemistry domain profile
+- clinical / toxicology domain profile
 - data-analysis method profile when repeated structured analytics semantics justify it
 
 A Plugin may add:
