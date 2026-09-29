@@ -55,8 +55,8 @@ session開始時は次の順で必要moduleを決める。
 | durable logを設計・記録する | `LOG_CORE_v1.0.md` |
 | production Web update logを扱う | Log Core + `WEB_UPDATE_LOG_PLUGIN_v1.0.md` |
 | Researchを扱う | Research Core + Research Evidence Core + taskに必要なResearch plugin |
-| 化学物質のidentity / transformation / degradation / stabilityを扱う | Research Core + Research Evidence Core + `plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
-| 原料としての用途・目的機能・処方適性・sourcing/commercial評価を扱う | Chemical Research dependency closure + `plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
+| 化学物質のidentity / transformation / degradation / stabilityを扱う | Research Core + Research Evidence Core + `specs/research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
+| 原料としての用途・目的機能・処方適性・sourcing/commercial評価を扱う | Chemical Research dependency closure + `specs/research-evidence/plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
 | Safe Commit発動条件に該当する | Safe Commit AISPEC、実操作時のみReference |
 | ChatGPT/GitHub等のproduct mappingが必要 | 対応Adapter |
 | 上記に該当しない | 無関係なoptional moduleをloadしない |
@@ -73,8 +73,8 @@ project固有authority / Open Issue確認はroutingとは別に省略しない�
 | `WEB_UPDATE_LOG_PLUGIN_v1.0.md` | Web Update Log Plugin | production Web update history | deployment lifecycle / source / target / execution / validation / rollback |
 | `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md` | Safe Commit Engineの規範仕様 | large/multi-file commit transaction | parallel prepare / HEAD guard / hash / allowlist / validation / single commit |
 | `GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md` | 実装・操作Reference | 非規範の実行説明 | CLI / GitHub Actions / executor / performance observation / limitation |
-| `research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` | Chemical Research Plugin | chemical species / transformation / degradation / stability semantics | species identity / derivative-reference relation / product formation / mass balance / structural motif retention |
-| `research-evidence/plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` | Raw Material Research Plugin | intended-use evaluation layered on Chemical Research | intended function / formulation suitability / functional consequence / supplier / sourcing / commercial interpretation |
+| `specs/research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` | Chemical Research Plugin | chemical species / transformation / degradation / stability semantics | species identity / derivative-reference relation / product formation / mass balance / structural motif retention |
+| `specs/research-evidence/plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` | Raw Material Research Plugin | intended-use evaluation layered on Chemical Research | intended function / formulation suitability / functional consequence / supplier / sourcing / commercial interpretation |
 
 ## 4. authorityの境界
 
