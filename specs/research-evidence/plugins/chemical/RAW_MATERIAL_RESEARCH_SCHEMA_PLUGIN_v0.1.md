@@ -97,6 +97,29 @@ A RAW_MATERIAL_PRODUCT may contain:
 
 Do not equate product identity with a single chemical species unless composition evidence supports it.
 
+### 5.1 Mixtures, extracts, and incompletely characterized materials
+
+Raw Material Research is **not limited to pure or fully structurally resolved substances**.
+
+A RAW_MATERIAL_PRODUCT may be:
+- a defined single chemical,
+- a defined mixture,
+- a botanical/mineral/fermentation extract,
+- a fraction,
+- a carrier-containing active,
+- a proprietary blend,
+- or a material whose composition is only partially characterized.
+
+Chemical Research dependency means that known chemical identity/composition evidence is represented with chemical semantics when available. It does **not** require complete molecular resolution before raw-material research may proceed.
+
+For incompletely characterized materials:
+- represent the material/product identity at the raw-material level,
+- represent known composition as CHEMICAL_SPECIES / CHEMICAL_MIXTURE where supported,
+- keep unresolved composition explicit as UNKNOWN / NOT_IDENTIFIED / partially characterized,
+- do not invent a single active species merely to satisfy the Chemical dependency.
+
+A botanical or complex mixture MUST NOT be excluded from a raw-material candidate universe solely because it is not a pure compound.
+
 ## 6. Product-to-chemical relations
 
 Recommended relations:
