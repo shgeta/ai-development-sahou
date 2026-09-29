@@ -292,15 +292,25 @@ Do NOT infer biological activity merely because a motif is structurally present.
 
 ## 13. Species balance and mass balance
 
-Recommended ASSESSMENT_TYPE:
-- CHEMICAL_MASS_BALANCE
+Keep quantitative balance results separate from the judgment about whether the balance is closed.
 
-Recommended fields:
+Quantitative results are OBSERVATION records. Recommended fields:
 - INPUT_SPECIES_SET
 - IDENTIFIED_PRODUCT_SET
 - RECOVERED_EQUIVALENT
 - BALANCE_BASIS
+- VALUE
+- UNIT
+
+Recommended ASSESSMENT_TYPE:
+- CHEMICAL_MASS_BALANCE
+
+Recommended assessment fields:
+- TARGET_ACTIVITY_ID
+- BALANCE_OBSERVATION_IDS
+- BALANCE_BASIS
 - JUDGMENT
+- RATIONALE
 
 Recommended judgments:
 - CLOSED
@@ -310,13 +320,15 @@ Recommended judgments:
 
 "Parent decreased" with no quantified product information is normally OPEN, not CLOSED.
 
-A balance may be closed on:
+A balance may be evaluated on:
 - molar parent-equivalent basis,
 - atom-specific basis,
 - isotope basis,
 - another explicitly defined conserved basis.
 
 Do not compare mass percentages across species with different molar masses without an explicit basis.
+
+A numeric recovery result MUST NOT exist only inside the ASSESSMENT when it is itself a measured or derived result; preserve it as OBSERVATION and let the ASSESSMENT judge closure.
 
 ## 14. Unknown and non-detection handling
 
