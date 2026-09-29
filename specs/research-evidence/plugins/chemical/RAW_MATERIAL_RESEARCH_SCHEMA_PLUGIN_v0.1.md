@@ -81,10 +81,9 @@ Recommended ENTITY_KIND values:
 - RAW_MATERIAL_GRADE
 - FORMULATION_USE_CONTEXT
 - INTENDED_FUNCTION
-- COMMERCIAL_OFFER
 
 Chemical species remain CHEMICAL_SPECIES from Chemical Research.
-Supplier/manufacturer organizations use Core/Paper organization semantics where applicable.
+Supplier/manufacturer organizations are Core ENTITY identities. If Paper Research is also active, reuse the same ORGANIZATION identity rather than creating a parallel supplier-specific organization record; Raw Material Research does not require Paper Research merely to represent an organization.
 
 A RAW_MATERIAL_PRODUCT may contain:
 - one chemical species,
@@ -163,10 +162,7 @@ Therefore intended function SHOULD be linked to a QUESTION or FORMULATION_USE_CO
 - TARGET_PRODUCT_TYPE
 - TARGET_TISSUE_OR_SYSTEM
 - TARGET_OUTCOME
-- FUNCTION_PRIORITY
 - FUNCTION_EVIDENCE_SCOPE
-
-`FUNCTION_PRIORITY` may be used for project prioritization but is not scientific evidence.
 
 ## 8. Functional consequence of chemical transformation
 
@@ -284,9 +280,12 @@ Distinguish:
 - supplier recommendation,
 - experimentally tested condition,
 - regulatory limit,
-- project-selected condition.
+- project-selected target/use condition.
 
 Do not merge them into one "use level".
+
+Supplier recommendation, experimental observation, and regulatory limit are evidence/source-backed semantics.
+A project-selected target/use condition is a QUESTION / use-context / work decision and MUST NOT be represented as if it were an empirical OBSERVATION.
 
 ## 12. Supplier and specification evidence
 
