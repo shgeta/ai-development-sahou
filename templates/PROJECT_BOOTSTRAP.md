@@ -46,7 +46,14 @@ projectで使うものだけ残す / 追加する。
   - `specs/safe-commit/GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md`
   - 実操作時のみ `specs/safe-commit/GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md`
 - Research:
-  - Research Core + taskに必要なpluginのみ
+  - `specs/research-evidence/RESEARCH_CORE_v0.1.md`
+  - `specs/research-evidence/RESEARCH_EVIDENCE_CORE_SCHEMA_v0.1.md`
+  - taskに必要なpluginのみ
+- Chemical research:
+  - `specs/research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md`
+- Raw-material research:
+  - `specs/research-evidence/plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md`
+  - parent dependencyとして Chemical Research Plugin もloadする
 - Product adapter:
   - product固有mappingが必要な時だけ対応Adapter
 
