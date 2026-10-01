@@ -124,10 +124,10 @@ Failure to preserve this distinction is a research-process error even when every
 
 ### Exploration modes
 
-Research Core defines three user-selectable exploration modes.
+Research Core provides two standard exploration modes plus user-directed custom exploration.
 
 1. **BREADTH_FIRST_BERRYPICKING** — default
-   - breadth-first traversal across active QUESTION / lane set;
+   - breadth-first traversal across the active QUESTION / lane set;
    - berrypicking expands later passes from newly discovered terms, citations, authors, entities, methods, patents, suppliers, regulations, and related leads;
    - use when the research surface is still being mapped or when multiple lanes remain material.
 
@@ -136,16 +136,14 @@ Research Core defines three user-selectable exploration modes.
    - use when the user explicitly wants a focused deep dive or when one lane is an acknowledged blocking dependency;
    - the Scope Anchor remains unchanged unless the user also changes scope.
 
-3. **SYSTEMATIC**
-   - use an explicit search / inclusion / exclusion / coverage protocol over a defined universe;
-   - prioritize reproducibility and coverage accounting over adaptive exploration;
-   - use when completeness, auditability, or a defined review protocol matters more than opportunistic expansion.
+3. **OTHER / CUSTOM**
+   - any user-directed exploration strategy that does not fit the two standard modes;
+   - examples may include systematic-review style protocols, fixed citation chasing, exhaustive registry sweeps, hypothesis-driven searches, or other task-specific methods;
+   - the user instruction defines the exploration method for that task.
 
-User selection overrides the default exploration mode.
 If the user does not choose a mode, use **BREADTH_FIRST_BERRYPICKING**.
 
-Citation chasing, hypothesis testing, decision prioritization, source-class switching, and similar techniques are methods that MAY be used inside these modes rather than separate top-level exploration modes.
-
+Techniques such as citation chasing, hypothesis testing, decision prioritization, source-class switching, and systematic search MAY be invoked inside either standard mode or under OTHER / CUSTOM when explicitly useful.
 
 Default exploration strategy is **breadth-first + berrypicking**.
 
