@@ -120,12 +120,17 @@ Before presenting a “complete”, “overall”, “all candidates”, “mast
 
 Failure to preserve this distinction is a research-process error even when every individual fact is correct.
 
-## 3.2 Round-robin exploration and fixation guardrail
+## 3.2 Breadth-first + berrypicking exploration and fixation guardrail
 
-Research exploration SHOULD normally proceed in **bounded rounds across the active QUESTION / lane set**, rather than allowing one unresolved item to monopolize subsequent work.
+Default exploration strategy is **breadth-first + berrypicking**.
+
+- **breadth-first** defines the traversal cadence: visit the active QUESTION / lane set in bounded passes before repeatedly deepening one lane.
+- **berrypicking** defines how the search surface expands: each useful source may expose new terms, authors, citations, entities, methods, patents, suppliers, regulations, or hypotheses that become candidates for later passes.
+
+Research exploration SHOULD therefore normally proceed in bounded rounds across the active QUESTION / lane set, while using newly discovered leads to expand subsequent rounds.
 
 The purpose is not to prevent deep investigation.
-The purpose is to ensure that depth is chosen deliberately after the broader evidence surface has been revisited.
+The purpose is to ensure that depth is chosen deliberately after the broader evidence surface has been revisited, while still allowing the search vocabulary and source graph to evolve from what is learned.
 
 Default pattern:
 
@@ -133,18 +138,18 @@ Default pattern:
 Scope Anchor
   -> identify active lanes / QUESTIONS
   -> round N:
-       -> visit lane A for a bounded pass
-       -> visit lane B for a bounded pass
-       -> visit lane C for a bounded pass
-       -> ...
+       -> breadth-first bounded pass across material lanes
+       -> collect berrypicking leads from each pass
+       -> add / reprioritize candidate terms, sources, entities and relations
        -> update evidence / gaps / priorities
   -> synthesis checkpoint
-  -> choose next round or deliberate deep-dive
+  -> round N+1 expands from the updated map
+     or deliberate deep-dive when justified
 ```
 
 Rules:
 
-1. **Breadth before fixation.** When several active lanes remain material to the decision, a single unresolved lane SHOULD NOT absorb repeated consecutive search passes merely because it is unresolved.
+1. **Breadth before fixation.** When several active lanes remain material to the decision, traversal SHOULD be breadth-first by default; a single unresolved lane SHOULD NOT absorb repeated consecutive search passes merely because it is unresolved.
 2. Each lane pass SHOULD be **bounded** by a practical search budget such as:
    - a defined query family,
    - a defined source class,
@@ -167,7 +172,7 @@ Rules:
    - user priority,
    - source availability.
 7. Repeated failure on the same source route SHOULD NOT cause indefinite retries. Mark the route as attempted, preserve the result, and change lane or route.
-8. A later round SHOULD begin from the Scope Anchor and current QUESTION set, not merely from the final unresolved item of the prior round.
+8. A later round SHOULD begin from the Scope Anchor and current QUESTION set, enriched by berrypicking leads from prior rounds, not merely from the final unresolved item of the prior round.
 
 ### Issue / work-item support
 
@@ -382,6 +387,8 @@ A Research Core implementation should preserve at least these distinctions:
 - classification convenience != exclusion criterion
 - unresolved lane != automatic next action
 - parked != abandoned
+- breadth-first traversal != fixed search vocabulary
+- berrypicking expansion != silent scope expansion
 
 ## 12. Current architecture
 
