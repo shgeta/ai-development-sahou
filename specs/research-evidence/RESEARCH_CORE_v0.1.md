@@ -150,10 +150,13 @@ Default exploration strategy is **breadth-first + berrypicking**.
 - **breadth-first** defines the traversal cadence: visit the active QUESTION / lane set in bounded passes before repeatedly deepening one lane.
 - **berrypicking** defines how the search surface expands: each useful source may expose new terms, authors, citations, entities, methods, patents, suppliers, regulations, or hypotheses that become candidates for later passes.
 
-Research exploration SHOULD therefore normally proceed in bounded rounds across the active QUESTION / lane set, while using newly discovered leads to expand subsequent rounds.
+Research exploration SHOULD therefore continue autonomously across the active QUESTION / lane set, while using newly discovered leads to expand the search surface.
 
-The purpose is not to prevent deep investigation.
-The purpose is to ensure that depth is chosen deliberately after the broader evidence surface has been revisited, while still allowing the search vocabulary and source graph to evolve from what is learned.
+Rounds are an organizational aid, not a mandatory stopping boundary.
+Exploration SHOULD NOT stop merely because one nominal round has completed if useful unexplored leads remain.
+
+The purpose is not to prevent deep investigation or force periodic stopping.
+The purpose is to avoid fixation while allowing the search vocabulary, lane structure and source graph to keep expanding from what is learned.
 
 Default pattern:
 
@@ -165,8 +168,10 @@ Scope Anchor
        -> collect berrypicking leads from each pass
        -> add / reprioritize candidate terms, sources, entities and relations
        -> update evidence / gaps / priorities
-  -> synthesis checkpoint
-  -> round N+1 expands from the updated map
+  -> update the map continuously
+  -> keep exploring while useful leads remain
+  -> use synthesis checkpoints when helpful
+  -> later passes expand from the updated map
      or deliberate deep-dive when justified
 ```
 
@@ -183,9 +188,9 @@ Rules:
 4. A parked lane SHOULD be revisited when:
    - a later source creates a new lead,
    - another lane reveals a dependency,
-   - the synthesis shows the lane is decision-critical,
+   - synthesis shows the lane is decision-critical,
    - the user explicitly prioritizes it,
-   - or the next research round begins.
+   - or exploration naturally returns to that area in a later pass.
 5. A lane MAY receive an immediate additional deep-dive when it is a **blocking dependency** for the next material decision. The reason for breaking round-robin cadence SHOULD be explicit in Issue/current-state history.
 6. Round-robin order is not fixed. It MAY be reprioritized by:
    - decision impact,
@@ -195,17 +200,20 @@ Rules:
    - user priority,
    - source availability.
 7. Repeated failure on the same source route SHOULD NOT cause indefinite retries. Mark the route as attempted, preserve the result, and change lane or route.
-8. A later round SHOULD begin from the Scope Anchor and current QUESTION set, enriched by berrypicking leads from prior rounds, not merely from the final unresolved item of the prior round.
+8. Later passes SHOULD continue from the Scope Anchor and current QUESTION set, enriched by berrypicking leads from prior work, not merely from the most recently unresolved item.
 
 ### Issue / work-item support
 
-For substantial research, the Work Item / Issue SHOULD preserve enough state to resume the exploration cycle without fixation:
+For substantial research, the Work Item / Issue SHOULD preserve enough state to resume exploration without fixation:
 
-- **Current round** — current exploration pass identifier or brief description;
+- **Current pass / exploration state** — brief description of where the search currently is;
 - **Active lanes / QUESTIONS** — material lanes still in play;
 - **Parked** — unresolved items intentionally deferred after a bounded pass;
 - **Revisit trigger** — what would justify returning to each parked item;
-- **Next lanes** — where exploration should continue before another synthesis checkpoint.
+- **New leads / berries** — newly discovered terms, sources, entities, relations, or hypotheses;
+- **Next lanes** — where exploration can continue.
+
+These are continuation aids, not mandatory pause points.
 
 These fields do not need to be a rigid schema.
 A concise Issue comment or current-state section is sufficient.
@@ -222,6 +230,28 @@ Before running another consecutive deep search on the same unresolved item, ask:
 
 Failure mode:
 research remains factually careful but becomes inefficient and locally overfit because one hard-to-close gap receives unlimited attention while other decision-relevant lanes remain underexplored.
+
+### User steering
+
+Exploration is expected to keep moving unless:
+- the user asks to pause or synthesize,
+- a decision requires explicit confirmation,
+- the task reaches a natural closure,
+- or no material new route remains.
+
+User intervention may:
+- correct the Scope Anchor,
+- add or remove a lane,
+- reprioritize lanes,
+- switch exploration mode,
+- request a deep dive,
+- or redefine the decision target.
+
+Such steering SHOULD update durable current state so subsequent exploration follows the corrected axes.
+
+Default principle:
+
+> **Keep exploring; let user steering reshape the axes rather than requiring the user to repeatedly restart exploration.**
 
 ## 4. Evidence semantics
 
