@@ -80,6 +80,121 @@ Not every research task requires every step.
 
 Exploratory work may begin from an ENTITY, SOURCE, anomaly, dataset, code path, visual difference, or other seed and later create a QUESTION.
 
+## 3.1 Scope anchor and scope-drift guardrail
+
+Each active research QUESTION SHOULD maintain a **Scope Anchor**: the current authoritative definition of the research universe, inclusion/exclusion boundary, and decision target.
+
+Examples:
+- all formulation-ready raw-material candidates;
+- all implementations under a named runtime;
+- all publications satisfying a stated population/intervention criterion.
+
+A Scope Anchor is not replaced merely because the current activity is narrower.
+
+Rules:
+
+1. A source subset, search result set, paper-specific candidate list, plugin output, or local work queue is a **working subset**, not a new research universe.
+2. A working subset MUST NOT silently replace the Scope Anchor.
+3. A follow-up such as “find suppliers”, “compare products”, “validate implementations”, or “continue the search” MUST resolve its target set from the Scope Anchor unless the user explicitly narrows scope.
+4. If only a subset is being processed, the activity/output MUST be labeled as a subset pass and MUST NOT be presented as a complete audit of the anchored universe.
+5. Classification convenience MUST NOT become an implicit exclusion rule. Examples:
+   - pure compound != research-only by definition;
+   - extract != the definition of raw material;
+   - one paper’s botanical candidates != all candidates;
+   - one tool’s supported entities != the research universe.
+6. When the user corrects scope, that correction SHOULD update durable current-state records / plan / issue notes so later turns do not regress to the prior scope.
+7. Before changing the candidate universe, distinguish:
+   - **scope decision**: intentional change to the Scope Anchor;
+   - **subset activity**: temporary narrowing for one pass;
+   - **evidence result**: findings from that subset.
+
+### Scope-drift check
+
+Before presenting a “complete”, “overall”, “all candidates”, “master”, or equivalent synthesis, verify:
+
+- What is the current Scope Anchor?
+- Did the current activity cover the entire anchored universe?
+- If not, is the result clearly labeled as partial/subset?
+- Did any recent source or paper accidentally redefine the candidate universe?
+- Did a storage or schema category accidentally become an inclusion/exclusion criterion?
+
+Failure to preserve this distinction is a research-process error even when every individual fact is correct.
+
+## 3.2 Round-robin exploration and fixation guardrail
+
+Research exploration SHOULD normally proceed in **bounded rounds across the active QUESTION / lane set**, rather than allowing one unresolved item to monopolize subsequent work.
+
+The purpose is not to prevent deep investigation.
+The purpose is to ensure that depth is chosen deliberately after the broader evidence surface has been revisited.
+
+Default pattern:
+
+```text
+Scope Anchor
+  -> identify active lanes / QUESTIONS
+  -> round N:
+       -> visit lane A for a bounded pass
+       -> visit lane B for a bounded pass
+       -> visit lane C for a bounded pass
+       -> ...
+       -> update evidence / gaps / priorities
+  -> synthesis checkpoint
+  -> choose next round or deliberate deep-dive
+```
+
+Rules:
+
+1. **Breadth before fixation.** When several active lanes remain material to the decision, a single unresolved lane SHOULD NOT absorb repeated consecutive search passes merely because it is unresolved.
+2. Each lane pass SHOULD be **bounded** by a practical search budget such as:
+   - a defined query family,
+   - a defined source class,
+   - a defined number of citation hops,
+   - a defined method/test,
+   - or another explicit stopping condition.
+3. If a bounded pass does not close the lane, record it as **PARKED / OPEN / REVIEW_REQUIRED** as appropriate, preserve the search path, and continue to the next material lane.
+4. A parked lane SHOULD be revisited when:
+   - a later source creates a new lead,
+   - another lane reveals a dependency,
+   - the synthesis shows the lane is decision-critical,
+   - the user explicitly prioritizes it,
+   - or the next research round begins.
+5. A lane MAY receive an immediate additional deep-dive when it is a **blocking dependency** for the next material decision. The reason for breaking round-robin cadence SHOULD be explicit in Issue/current-state history.
+6. Round-robin order is not fixed. It MAY be reprioritized by:
+   - decision impact,
+   - evidence gap severity,
+   - dependency order,
+   - expected information gain,
+   - user priority,
+   - source availability.
+7. Repeated failure on the same source route SHOULD NOT cause indefinite retries. Mark the route as attempted, preserve the result, and change lane or route.
+8. A later round SHOULD begin from the Scope Anchor and current QUESTION set, not merely from the final unresolved item of the prior round.
+
+### Issue / work-item support
+
+For substantial research, the Work Item / Issue SHOULD preserve enough state to resume the exploration cycle without fixation:
+
+- **Current round** — current exploration pass identifier or brief description;
+- **Active lanes / QUESTIONS** — material lanes still in play;
+- **Parked** — unresolved items intentionally deferred after a bounded pass;
+- **Revisit trigger** — what would justify returning to each parked item;
+- **Next lanes** — where exploration should continue before another synthesis checkpoint.
+
+These fields do not need to be a rigid schema.
+A concise Issue comment or current-state section is sufficient.
+
+### Fixation check
+
+Before running another consecutive deep search on the same unresolved item, ask:
+
+- Is this item blocking the next decision?
+- Have the other material lanes in the current round received a reasonable pass?
+- Is there a new lead, method, or source route?
+- Would another attempt materially increase information, or merely repeat the same search?
+- Should this item be parked and revisited after the next synthesis checkpoint?
+
+Failure mode:
+research remains factually careful but becomes inefficient and locally overfit because one hard-to-close gap receives unlimited attention while other decision-relevant lanes remain underexplored.
+
 ## 4. Evidence semantics
 
 Research Core uses Research Evidence Core as the common evidence/provenance model.
@@ -262,6 +377,11 @@ A Research Core implementation should preserve at least these distinctions:
 - analysis method != research question
 - Research != Literature Research only
 - Research != Analytics only
+- working subset != Scope Anchor
+- source-specific candidate set != research universe
+- classification convenience != exclusion criterion
+- unresolved lane != automatic next action
+- parked != abandoned
 
 ## 12. Current architecture
 

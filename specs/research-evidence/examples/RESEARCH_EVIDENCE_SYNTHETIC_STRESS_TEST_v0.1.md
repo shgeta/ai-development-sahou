@@ -446,3 +446,154 @@ The schema/plugin fails if it:
 7. accepts stale-generation comparison metrics,
 8. deduplicates source occurrences together with reusable material,
 9. converts UNKNOWN / REVIEW_REQUIRED residuals into implementation defects without evidence.
+
+
+## 14. Scope-anchor / subset-drift stress test
+
+A synthetic formulation project investigates all candidate raw materials that may activate or support Receptor-R in skin.
+
+### 14.1 Scope Anchor
+
+The anchored universe includes:
+- defined small molecules,
+- organic acids,
+- vitamins,
+- fatty acids and lipids,
+- fragrance molecules,
+- isolated natural products,
+- standardized botanical extracts,
+- complex cosmetic raw materials.
+
+The project later reviews one publication that screens only botanical extracts.
+
+The publication identifies several interesting botanical hits.
+
+### 14.2 Follow-up request
+
+After reviewing that publication, the user asks:
+
+> Find the actual commercial raw-material names and manufacturers.
+
+Expected behavior:
+- resolve the follow-up target from the **full anchored universe**;
+- use the botanical publication as one subset/source;
+- map commercial suppliers across chemical, lipid, vitamin, fragrance, isolated-natural-product, extract, and complex-material classes;
+- optionally run a botanical subset pass, but label it explicitly as such.
+
+Failure behavior:
+- treat the publication’s botanical hit list as the new universe;
+- return only botanical suppliers while presenting the result as the project-wide supplier map;
+- silently classify pure chemicals as “research reagents” and therefore not raw materials;
+- use the previous turn’s local list as the authoritative scope without a scope decision.
+
+### 14.3 User correction
+
+The user then says:
+
+> I did not ask to limit this to botanical raw materials.
+
+Expected behavior:
+- recognize this as a **scope correction**;
+- restore the prior Scope Anchor;
+- update durable current-state / issue notes;
+- relabel earlier botanical-only output as a subset pass;
+- continue future work from the restored full universe.
+
+### 14.4 Failure conditions
+
+The Research Core process fails if it:
+1. allows a working subset to silently replace the Scope Anchor,
+2. calls a subset pass a full audit,
+3. turns a schema/storage category into an exclusion criterion,
+4. repeats the same narrower scope after an explicit user correction,
+5. fails to persist the corrected scope in durable project state.
+
+
+## 15. Round-robin exploration / fixation stress test
+
+A synthetic research project has six active lanes:
+
+- Q.A — identity / definition,
+- Q.B — mechanism,
+- Q.C — human evidence,
+- Q.D — safety,
+- Q.E — stability,
+- Q.F — regulation / sourcing.
+
+During round 1, Q.D exposes one difficult unresolved target: the primary protocol behind an old phototoxicity claim.
+
+### 15.1 Bad exploration behavior
+
+The researcher repeatedly:
+1. searches the same title,
+2. searches the same author names,
+3. searches the same database family,
+4. rephrases the same query,
+5. continues because the item is still unresolved.
+
+Meanwhile Q.E and Q.F receive no meaningful pass.
+
+Failure:
+the research becomes locally deep but globally incomplete.
+
+### 15.2 Expected round-robin behavior
+
+Round 1:
+- Q.A receives one bounded identity pass;
+- Q.B receives one mechanism pass;
+- Q.C receives one human-evidence pass;
+- Q.D receives one safety pass;
+- the phototoxicity primary protocol is not retrieved and is marked PARKED / REVIEW_REQUIRED;
+- Q.E receives a stability pass;
+- Q.F receives a regulation/sourcing pass.
+
+Issue/current state records:
+
+```text
+Current round: 1
+
+Parked:
+- Q.D / primary phototoxicity protocol
+  attempted: exact title + author + database search
+  state: REVIEW_REQUIRED
+  revisit trigger:
+    - later review exposes citation,
+    - archive/patent gives protocol name,
+    - next safety-focused round,
+    - user priority
+
+Next lanes:
+- finish Q.E
+- finish Q.F
+- synthesis checkpoint
+```
+
+After the synthesis checkpoint, Q.D may become high priority again if the final safety conclusion depends on it.
+
+### 15.3 Legitimate fixation exception
+
+Suppose Q.D is now the only unresolved blocker for a go/no-go safety decision.
+
+Expected behavior:
+- explicitly record that Q.D is a blocking dependency;
+- permit a deeper consecutive pass using a genuinely new route, e.g. archive holdings, regulatory dossier, author correspondence record, or cited report number;
+- do not merely repeat the prior search route without a new lead.
+
+### 15.4 New-lead revisit
+
+During Q.E stability research, a patent cites the exact phototoxicity report number.
+
+Expected behavior:
+- this is a valid **revisit trigger**;
+- return to Q.D even before the next full round if the new lead is material;
+- record the new route so the revisit is distinguishable from repetition.
+
+### 15.5 Failure conditions
+
+The Research Core process fails if it:
+1. treats unresolved status as sufficient reason for unlimited consecutive searching,
+2. retries the same route without a new lead or stopping condition,
+3. leaves other material lanes untouched while one difficult gap dominates,
+4. treats PARKED as false, disproven, or abandoned,
+5. starts the next round from the last unresolved item instead of the Scope Anchor / active lane set,
+6. forbids a justified deep-dive when one lane is an explicit blocking dependency.
