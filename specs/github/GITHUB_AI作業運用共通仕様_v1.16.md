@@ -455,6 +455,109 @@ HEAD: abcdef123
 
 コード・テスト・仕様などrepository本体の変更は通常どおりcommitする。
 
+### 4.0 Git ML / upstream向け文章作法
+
+Git mailing listやupstream projectへ送るpatchのcommit messageでは、**情報量の多さを丁寧さとみなさない**。読者が変更の必要性・意味・設計判断を短時間で理解できることを優先する。
+
+#### 説明順序
+
+原則として次の順で書く。
+
+```text
+1. user-visibleな対象と役割
+2. 既存の類似command / featureとの関係
+3. 現在不足しているbehavior / option / capability
+4. 今回何を変えるか
+5. なぜその設計・scope・互換性判断を選ぶのか
+6. WHYを理解するために必要なimplementation detailだけ
+```
+
+内部実装のmechanical factから始めない。
+
+例えば、
+
+```text
+git stash create always passes zero for include_untracked...
+```
+
+のような内部状態を最初に置くより、まず
+
+```text
+git stash create, git stash push, and git stash save all create a
+new stash entry. The latter two additionally provide options that
+control what is included in that entry. create only supports the
+equivalent of -m <message>; notably, it lacks -u and -a.
+```
+
+のように、source codeを知らない読者でも理解できるuser-visibleな関係と不足を説明する。
+
+#### WHATよりWHY
+
+implementation choiceを書く場合は、API名・helper名・flag値・control flowの列挙より、**なぜその実装判断が必要なのか**を書く。
+
+例:
+
+- `parse_options()` を使った事実だけではなく、従来のmessage parsingとの後方互換性を守るために最初のnon-optionで止める必要があることを書く。
+- 一部optionだけを追加する場合は、なぜそのsubsetなのかを書く。
+- 既存helperを再利用できることは補助説明であり、それ自体をdesign rationaleにしない。
+
+#### test / validationの扱い
+
+**testを追加した事実そのものをcommit messageで成果として列挙しない。**
+
+test code・diff・CI結果は変更を裏付けるevidenceであり、commit message本文の主役ではない。次のような理由がある場合だけ、必要最小限で触れる。
+
+- backward compatibilityの境界を説明するために不可欠
+- regressionの性質がdesign decisionと直結する
+- 従来behaviorと新behaviorの境界を明確にする
+- reviewerが変更の意味を理解するためにtest scenario自体が重要
+
+「short/long option、combined option、ignored-only、no-change、refs preservation...をtestした」のような網羅列挙は、原則として本文から外す。
+
+#### 既存規約の説明
+
+既存のexit-status convention、通常のtest追加、一般的なGit慣習など、**今回変更していない規約を長く説明しない**。
+
+書くのは次の場合に限る。
+
+- 今回その規約を変更する
+- 規約との境界が今回のdesign decisionになる
+- 読者が一見すると規約違反に見える可能性があり、その誤解を解く必要がある
+
+#### AI生成文の再編集
+
+AIが生成したupstream向け文章は、そのまま送らない。特に次を削る。
+
+- 正しいが本筋ではない実装事実
+- reviewerがdiffから容易に確認できる列挙
+- test coverageの網羅列挙
+- 既存規約の再説明
+- 同じ意味の言い換え
+- 「念のため」追加された背景
+- source codeを逐語的に説明する文章
+
+最終稿では各段落について、
+
+```text
+この段落はreaderに何を判断してもらうために必要か？
+```
+
+を確認し、答えが明確でない段落は削除または統合する。
+
+#### 丁寧さの定義
+
+upstream向け文章での丁寧さは、情報を増やすことではない。
+
+```text
+丁寧さ
+  = 必要なcontextを先に置く
+  + WHYを明示する
+  + scopeの境界を説明する
+  + 読者が不要な情報を読まなくて済むよう削る
+```
+
+「検証をたくさんしたので列挙する」「内部で何をしたか全部説明する」という方向へ文章を膨らませない。
+
 commit messageには、可能であればIssue番号を関連付ける。
 
 例:
