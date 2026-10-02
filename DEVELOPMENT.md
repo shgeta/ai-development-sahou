@@ -1,5 +1,9 @@
 # SAHOU Development Guide
 
+> **WRITE GATE:** Before any repository mutation, read [SAHOU_WRITE_LOCK.md](SAHOU_WRITE_LOCK.md).
+> SAHOU writes are `LOCKED` by default and require an explicit, task-scoped user unlock.
+> Read-only inspection does not require unlock.
+
 この文書は **SAHOUを利用するproject向けの共通仕様ではなく、`shgeta/ai-development-sahou` repository自体を修正・保守する開発者向け運用** である。
 
 ## 1. Scope
