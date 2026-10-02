@@ -107,7 +107,9 @@ shared cacheはSAHOUのauthorityではありません。authorityはGitHub repos
 
 ## SAHOU自体の開発
 
-このrepository自体を修正・保守する場合は、利用者向け共通仕様とは別に [SAHOU Development Guide](DEVELOPMENT.md) を使用します。
+このrepository自体を修正・保守する場合は、まず [SAHOU Write Lock](SAHOU_WRITE_LOCK.md) を確認します。SAHOUへのwriteはdefaultで `LOCKED` であり、明示的・task-scopedなuser unlockがある場合だけ開始できます。read-onlyの調査・review・提案はLOCKEDのまま行えます。
+
+unlock後の開発手順は、利用者向け共通仕様とは別に [SAHOU Development Guide](DEVELOPMENT.md) を使用します。
 
 PR merge前にAI reviewを行い、Issue / PR diff / base側関連仕様 / 周辺文脈を再確認した上で、Actions / CIとあわせて検証します。
 
