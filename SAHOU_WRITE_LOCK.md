@@ -38,7 +38,9 @@ SAHOUを更新して
 共通SAHOUにこの変更を書いて
 ```
 
-A generic continuation instruction such as `進めて`, `やって`, or `続けて` does not unlock SAHOU unless it is an immediate and unambiguous response to a proposed SAHOU write action.
+A generic continuation instruction such as `進めて`, `やって`, or `続けて` NEVER unlocks SAHOU by itself.
+
+Unlock requires explicit SAHOU/common-spec write intent in the current user instruction, such as naming SAHOU/common SAHOU and asking to unlock, write, update, or change it.
 
 The AI MUST NOT infer unlock authority from:
 - prior conversations;
