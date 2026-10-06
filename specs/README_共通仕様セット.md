@@ -102,7 +102,7 @@ Task Staging Storeはscheduled / unattended task用の非canonical保存roleで�
 
 Project LocalはCommonそのものを複製する場所ではなく、project / environment固有の差分・生成Adapter・certification等を保持するlayerである。`Local` はmachine-local temporary workspaceを意味しない。Commonをbaselineとし、Project Localのexplicit override / mapping / extensionをoverlayした結果をEffective SAHOUとして使用する。
 
-ChatGPT Adapterでは、valid certified Task Staging Adapterがなく、ChatGPT Libraryが利用可能かつ現在write可能なら、Libraryをproduct-specific default noncanonical fallbackとして使ってよい。fallback保存は `DEFAULT_FALLBACK_SAVED` とし、certified staging / canonical ingestionと区別する。certificationは後からscheduled acceptanceで取得し、その後の実行で優先利用する。
+ChatGPT Adapterでは、valid certified Task Staging Adapterがなく、ChatGPT Libraryが利用可能かつ現在write可能なら、Libraryをproduct-specific default noncanonical fallbackとして使ってよい。fallback保存は `DEFAULT_FALLBACK_SAVED` とし、certified staging / canonical ingestionと区別する。certificationは後からscheduled acceptanceで取得し、その後の実行で優先利用する。default fallbackが使えない場合もrepository / Issue / canonical evidence等へ自動fallback writeしない。
 
 ### GitHub AI作業運用
 
