@@ -44,7 +44,7 @@ Project Localの `Local` はmachine-local temporary workspaceを意味しない�
 
 Commonはbaselineであり、Project Localのexplicit override / mapping / extensionをoverlayした結果をこのprojectのEffective SAHOUとする。implicit overrideは適用しない。
 
-durable outputを持つscheduled / unattended production taskを作成または再有効化する場合は、taskをenableする前にTask Staging Adapterとvalid certificationを確認する。存在しない / expired / invalid / REVALIDATEの場合はproduction taskを先にenableせず、Adapter setupとseparate scheduled Test Taskによるacceptanceを先に完了する。read-only / no durable output taskのみ明示的にgate N/Aとできる。runtimeではvalid certification付きAdapterを使用し、各taskごとにstoreを再選定しない。production writeが失敗した場合は再検証へ送る。
+durable outputを持つscheduled / unattended production taskでは、まずvalid certification付きTask Staging Adapterを確認し、存在すればそれを優先する。存在しない / expired / invalid / REVALIDATEでも、それだけを理由にtaskを停止しない。product/environment Adapterがdefault noncanonical fallbackを定義し、current runtimeでwrite可能ならその経路へ `DEFAULT_FALLBACK_SAVED` として退避する。fallbackも利用できない場合は他のeligible noncanonical候補を探索し、canonical authorityへ自動fallbackしない。separate scheduled Test Taskによるacceptanceとcertificationは別途進め、READY後の実行からcertified Adapterを優先する。
 
 ## SAHOU modules
 
@@ -61,9 +61,10 @@ projectで使うものだけ残す / 追加する。
 - Project Local:
   - `specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md`
 - scheduled / unattended task staging:
-  - `specs/platform/TASK_STAGING_STORE_AISPEC_v1.1.md`
+  - `specs/platform/TASK_STAGING_STORE_AISPEC_v1.2.md`
   - `specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md`
-  - projectのcertified Task Staging Adapter
+  - product Adapterのdefault fallback mapping
+  - projectのTask Staging Adapter / certification（存在する場合）
 - durable log:
   - `specs/log/LOG_CORE_v1.0.md`
 - production Web update log:
