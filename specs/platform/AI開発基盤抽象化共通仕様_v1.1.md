@@ -1,7 +1,7 @@
 # AI開発基盤抽象化 共通仕様 v1.1
 
 - Updated: 2026-10-06
-- Status: PROPOSED
+- Status: APPROVED
 - Scope: AI/人間の継続開発で使用する外部サービス・保存領域・repository・work item・CI・unattended staging等の製品非依存な役割定義
 - Relation: AISPEC / repository運用 / Current State / Adapter specifications / Task Staging Store / Project Local の共通基盤
 - Supersedes: `AI開発基盤抽象化 共通仕様 v1.0`
