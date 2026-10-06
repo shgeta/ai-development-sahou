@@ -13,6 +13,8 @@ AIと人間が継続的に開発するための、仕様記述・作業管理・
 - **Work Item / Issue**: 議題・判断・成功/失敗を含む履歴の正本
 - **Current State / Status**: activeな現在地・focus・blocker・nextの補助盤
 - **Adapter**: ChatGPTやGitHub等の製品固有機能を、製品非依存の論理役割へ対応付ける
+- **Task Staging Store**: scheduled / unattended taskがcanonical authorityを直接変更せず、追加の人間対話なしに結果を永続化する非canonical保存role
+- **SAHOU Project Local**: project / environment固有のCommon override、AISPEC、生成Adapter、certification等を保持するlayer
 - **Log Core**: domain非依存のappend-only / correction / persistence / traceability作法
 - **Log Plugin**: Web update等、必要なdomainだけCoreへ追加する
 - **Safe Commit Engine**: 大きな変更をfull-file replacementに頼らず、安全なpatch bundleとして適用する
@@ -29,18 +31,22 @@ conversation
        -> versioned repository / commit
   -> validation evidence
        -> CI / tests / Work Item
+  -> unattended intermediate resultが必要な場合
+       -> certified Task Staging Store Adapter
   -> durable loggingが必要な場合
        -> Log Core + selected plugin
 ```
 
-Work Itemは成功時だけ残すものではありません。失敗・却下・中止・保留・no-change・調査のみの場合も、議題として扱った履歴として保持します。
+Task Staging Storeへの保存はcanonical ingestionではありません。staging resultをcanonical authorityへ反映する場合は、別途reconciliation / canonical writeの責務を実行します。
 
 ## 構成
 
 ### Core
 - [AISPEC v1.2](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2.md)
 - [Continuous Conversation Distillation shard](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2_SHARD_CONTINUOUS_DISTILLATION.md)
-- [AI開発基盤抽象化 共通仕様 v1.0](specs/platform/AI開発基盤抽象化共通仕様_v1.0.md)
+- [AI開発基盤抽象化 共通仕様 v1.1](specs/platform/AI開発基盤抽象化共通仕様_v1.1.md)
+- [Task Staging Store AISPEC v1.0](specs/platform/TASK_STAGING_STORE_AISPEC_v1.0.md)
+- [SAHOU Project Local AISPEC v1.0](specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.0.md)
 
 ### Adapters
 - [ChatGPT Adapter v1.1](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.1.md)
@@ -48,9 +54,6 @@ Work Itemは成功時だけ残すものではありません。失敗・却下�
 
 ### GitHub運用
 - [GitHub AI作業運用 共通仕様 v1.16](specs/github/GITHUB_AI作業運用共通仕様_v1.16.md)
-- [Conversation-to-Authority Sync](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_CONVERSATION_SYNC.md)
-- [Status + Issue Binding](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_STATUS_ISSUE_BINDING.md)
-- [Issue Outcome Retention](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_ISSUE_OUTCOME_RETENTION.md)
 
 ### Log
 - [Log Core v1.0](specs/log/LOG_CORE_v1.0.md)
@@ -63,9 +66,6 @@ Work Itemは成功時だけ残すものではありません。失敗・却下�
 - [Research Evidence Core Schema v0.1](specs/research-evidence/RESEARCH_EVIDENCE_CORE_SCHEMA_v0.1.md)
 - [Paper Research Schema Plugin v0.1](specs/research-evidence/plugins/PAPER_RESEARCH_SCHEMA_PLUGIN_v0.1.md)
 - [Analysis Research Schema Plugin v0.1](specs/research-evidence/plugins/ANALYSIS_RESEARCH_SCHEMA_PLUGIN_v0.1.md)
-- [Synthetic Research Stress Test v0.1](specs/research-evidence/examples/RESEARCH_EVIDENCE_SYNTHETIC_STRESS_TEST_v0.1.md)
-
-Researchは文献検索だけを指しません。source research、empirical investigation、data/code/log/visual analytics、evidence evaluation、synthesisを含む上位概念です。AnalyticsはResearch内のACTIVITYとして扱います。
 
 ### Safe Commit
 - [Safe Commit Engine AISPEC v1.2](specs/safe-commit/GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md)
@@ -74,15 +74,44 @@ Researchは文献検索だけを指しません。source research、empirical in
 ### 既存セットREADME
 - [共通仕様セットREADME](specs/README_共通仕様セット.md)
 
-## 製品非依存とAdapter
+## Task staging の標準経路
 
-Coreでは `Persistent Project Store`、`Versioned Repository`、`Work Item Tracker`、`CI / Validation Runner` などの論理役割を定義します。
+scheduled / unattended task用のwrite destinationは、固定製品名ではなく現在環境からsetup時に決めます。
 
-具体的な製品を使う場合はAdapterで対応付けます。たとえば、利用可能なChatGPT環境では `Persistent Project Store` を **ChatGPT Library** に、GitHubを使う環境では `Work Item Tracker` を **GitHub Issues** に対応付けます。
+```text
+setup with user
+  -> candidate storesを探索
+  -> unattended runtimeで追加承認なくwrite/readできる候補を評価
+  -> 複数候補ならuserが選択
+  -> environment-specific Adapterを生成
+  -> Project Localへ保存
+  -> optional manual smoke test
+  -> production taskとは別のscheduled Test Task
+  -> normal scheduler executionでacceptance
+  -> cross-run persistence等を確認
+  -> time-bounded certification
+  -> production taskで利用
+```
+
+manual chatで成功してもscheduled runtimeで成功する保証にはしません。`Run now` 等のmanual immediate triggerはsmoke testには使えてもscheduled acceptanceの代替にしません。
+
+## SAHOU Project Local
+
+Project Localはmachine-local temporary directoryではありません。Commonに対するproject / environment固有差分のlogical layerです。
+
+推奨embedded location:
+
+```text
+<repo>/.sahou/project-local/
+```
+
+third-party repository等でtarget repositoryを変更したくない場合はsidecar locationを使用できます。実際のlocationはPROJECT_BOOTSTRAPから解決します。
+
+既存repositoryへSAHOUを適用する際はmigrationを必須にせず、`no migration -> additive Project Local adaptation -> targeted migration -> full migration` の順で最小侵襲を優先します。
 
 ## 毎回の開発開始
 
-各projectは、SAHOU全文をproject内へ複製せず、[PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md) から共通SAHOUを参照します。
+各projectは、SAHOU全文をproject内へ複製せず、[PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md) から共通SAHOUとProject Localを参照します。
 
 標準起動:
 
@@ -91,6 +120,7 @@ PROJECT_BOOTSTRAP
   -> SAHOU main exact SHA確認
   -> shared exact-SHA snapshotをresolve / integrity確認
   -> routing indexを読む
+  -> Project Localをresolve
   -> project固有spec / Current State / Open Work Itemを確認
   -> taskに必要なSAHOU moduleを選ぶ
   -> selected module + dependency closureだけcontextへload
@@ -103,15 +133,11 @@ shared cacheはSAHOUのauthorityではありません。authorityはGitHub repos
 - [PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md)
 - [snapshot manifest tool](tools/sahou_snapshot_manifest.py)
 
-`SAHOU_FULL.md` のような派生統合fileは作りません。cacheはexact repository snapshotそのものを保持できますが、session contextへはroutingで選ばれたmoduleだけを展開します。
-
 ## SAHOU自体の開発
 
-このrepository自体を修正・保守する場合は、まず [SAHOU Write Lock](SAHOU_WRITE_LOCK.md) を確認します。SAHOUへのwriteはdefaultで `LOCKED` であり、明示的・task-scopedなuser unlockがある場合だけ開始できます。read-onlyの調査・review・提案はLOCKEDのまま行えます。
+このrepository自体を修正・保守する場合は、まず [SAHOU Write Lock](SAHOU_WRITE_LOCK.md) を確認します。SAHOUへのwriteはdefaultで `LOCKED` であり、明示的・task-scopedなuser unlockがある場合だけ開始できます。
 
-unlock後の開発手順は、利用者向け共通仕様とは別に [SAHOU Development Guide](DEVELOPMENT.md) を使用します。
-
-PR merge前にAI reviewを行い、Issue / PR diff / base側関連仕様 / 周辺文脈を再確認した上で、Actions / CIとあわせて検証します。
+unlock後の開発手順は [SAHOU Development Guide](DEVELOPMENT.md) を使用します。
 
 ## ライセンス
 
