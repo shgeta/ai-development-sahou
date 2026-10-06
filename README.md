@@ -37,6 +37,8 @@ conversation
        -> Log Core + selected plugin
 ```
 
+Work Itemは成功時だけ残すものではありません。失敗・却下・中止・保留・no-change・調査のみの場合も、議題として扱った履歴として保持します。
+
 Task Staging Storeへの保存はcanonical ingestionではありません。staging resultをcanonical authorityへ反映する場合は、別途reconciliation / canonical writeの責務を実行します。
 
 ## 構成
@@ -54,6 +56,9 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 
 ### GitHub運用
 - [GitHub AI作業運用 共通仕様 v1.16](specs/github/GITHUB_AI作業運用共通仕様_v1.16.md)
+- [Conversation-to-Authority Sync](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_CONVERSATION_SYNC.md)
+- [Status + Issue Binding](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_STATUS_ISSUE_BINDING.md)
+- [Issue Outcome Retention](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_ISSUE_OUTCOME_RETENTION.md)
 
 ### Log
 - [Log Core v1.0](specs/log/LOG_CORE_v1.0.md)
@@ -66,6 +71,9 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 - [Research Evidence Core Schema v0.1](specs/research-evidence/RESEARCH_EVIDENCE_CORE_SCHEMA_v0.1.md)
 - [Paper Research Schema Plugin v0.1](specs/research-evidence/plugins/PAPER_RESEARCH_SCHEMA_PLUGIN_v0.1.md)
 - [Analysis Research Schema Plugin v0.1](specs/research-evidence/plugins/ANALYSIS_RESEARCH_SCHEMA_PLUGIN_v0.1.md)
+- [Synthetic Research Stress Test v0.1](specs/research-evidence/examples/RESEARCH_EVIDENCE_SYNTHETIC_STRESS_TEST_v0.1.md)
+
+Researchは文献検索だけを指しません。source research、empirical investigation、data/code/log/visual analytics、evidence evaluation、synthesisを含む上位概念です。AnalyticsはResearch内のACTIVITYとして扱います。
 
 ### Safe Commit
 - [Safe Commit Engine AISPEC v1.2](specs/safe-commit/GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md)
@@ -74,44 +82,17 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 ### 既存セットREADME
 - [共通仕様セットREADME](specs/README_共通仕様セット.md)
 
-## Task staging の標準経路
+## 製品非依存とAdapter
 
-scheduled / unattended task用のwrite destinationは、固定製品名ではなく現在環境からsetup時に決めます。
+Coreでは `Persistent Project Store`、`Versioned Repository`、`Work Item Tracker`、`CI / Validation Runner` などの論理役割を定義します。
 
-```text
-setup with user
-  -> candidate storesを探索
-  -> unattended runtimeで追加承認なくwrite/readできる候補を評価
-  -> 複数候補ならuserが選択
-  -> environment-specific Adapterを生成
-  -> Project Localへ保存
-  -> optional manual smoke test
-  -> production taskとは別のscheduled Test Task
-  -> normal scheduler executionでacceptance
-  -> cross-run persistence等を確認
-  -> time-bounded certification
-  -> production taskで利用
-```
+具体的な製品を使う場合はAdapterで対応付けます。たとえば、利用可能なChatGPT環境では `Persistent Project Store` を **ChatGPT Library** に、GitHubを使う環境では `Work Item Tracker` を **GitHub Issues** に対応付けます。
 
-manual chatで成功してもscheduled runtimeで成功する保証にはしません。`Run now` 等のmanual immediate triggerはsmoke testには使えてもscheduled acceptanceの代替にしません。
-
-## SAHOU Project Local
-
-Project Localはmachine-local temporary directoryではありません。Commonに対するproject / environment固有差分のlogical layerです。
-
-推奨embedded location:
-
-```text
-<repo>/.sahou/project-local/
-```
-
-third-party repository等でtarget repositoryを変更したくない場合はsidecar locationを使用できます。実際のlocationはPROJECT_BOOTSTRAPから解決します。
-
-既存repositoryへSAHOUを適用する際はmigrationを必須にせず、`no migration -> additive Project Local adaptation -> targeted migration -> full migration` の順で最小侵襲を優先します。
+scheduled / unattended task用のwrite destinationは固定製品名で決めず、setup時に現在環境の候補を評価し、必要ならuserが選択してenvironment-specific Adapterを生成します。manual chatでの成功はscheduled runtimeのacceptanceにはならず、本taskとは別のscheduled Test Taskで検証して期限付きcertificationを記録します。
 
 ## 毎回の開発開始
 
-各projectは、SAHOU全文をproject内へ複製せず、[PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md) から共通SAHOUとProject Localを参照します。
+各projectは、SAHOU全文をproject内へ複製せず、[PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md) から共通SAHOUを参照します。project / environment固有の差分や生成Adapterが必要な場合は、Bootstrapから `SAHOU Project Local` を解決します。
 
 標準起動:
 
@@ -133,11 +114,17 @@ shared cacheはSAHOUのauthorityではありません。authorityはGitHub repos
 - [PROJECT_BOOTSTRAP template](templates/PROJECT_BOOTSTRAP.md)
 - [snapshot manifest tool](tools/sahou_snapshot_manifest.py)
 
+`SAHOU_FULL.md` のような派生統合fileは作りません。cacheはexact repository snapshotそのものを保持できますが、session contextへはroutingで選ばれたmoduleだけを展開します。
+
+Project Localの推奨embedded locationは `<repo>/.sahou/project-local/` です。ただしthird-party repository等でtarget repositoryを変更したくない場合はsidecar配置を使用できます。既存repositoryへのmigrationは必須ではなく、`no migration -> additive Project Local adaptation -> targeted migration -> full migration` の順で最小侵襲を優先します。
+
 ## SAHOU自体の開発
 
-このrepository自体を修正・保守する場合は、まず [SAHOU Write Lock](SAHOU_WRITE_LOCK.md) を確認します。SAHOUへのwriteはdefaultで `LOCKED` であり、明示的・task-scopedなuser unlockがある場合だけ開始できます。
+このrepository自体を修正・保守する場合は、まず [SAHOU Write Lock](SAHOU_WRITE_LOCK.md) を確認します。SAHOUへのwriteはdefaultで `LOCKED` であり、明示的・task-scopedなuser unlockがある場合だけ開始できます。read-onlyの調査・review・提案はLOCKEDのまま行えます。
 
-unlock後の開発手順は [SAHOU Development Guide](DEVELOPMENT.md) を使用します。
+unlock後の開発手順は、利用者向け共通仕様とは別に [SAHOU Development Guide](DEVELOPMENT.md) を使用します。
+
+PR merge前にAI reviewを行い、Issue / PR diff / base側関連仕様 / 周辺文脈を再確認した上で、Actions / CIとあわせて検証します。
 
 ## ライセンス
 
