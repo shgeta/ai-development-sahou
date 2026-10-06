@@ -33,6 +33,7 @@ stagingへ保存されたという事実だけで、canonical data / canonical e
 | `PLATFORM.STAGING.010` | Runtime eligibility | REQUIREMENT | staging store候補は、そのruntime executionにおいてwrite capabilityが現在利用可能で、追加認証・追加承認・人間対話を要求せず、canonical authorityではない場合にのみeligibleとする | scheduled / unattended runtime | staging destinationを選定・利用するとき | - | candidate store | `STAGING_SETUP` | 10 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.020` | Permission non-inference | PROHIBITION | 過去chatの許可、過去のwrite成功、project ownership、repository write access、task作成時の承認、記憶されたuser preferenceを現在runtimeのwrite permissionとして推定しない | all task staging | permission/capabilityを判定するとき | - | runtime authorization judgment | `STAGING_SETUP` | 20 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.030` | Setup/runtime separation | REQUIREMENT | human interactionを期待できるsetup/adaptation phaseと、human interactionを期待しないruntime phaseを分離する | adapter lifecycle | staging Adapterを新設・変更するとき | - | staging workflow | `STAGING_SETUP` | 30 | APPROVED | `shgeta/ai-development-sahou#28` |
+| `PLATFORM.STAGING.035` | Interaction axes | REQUIREMENT | `HUMAN_INTERACTION_AVAILABLE` と `HUMAN_INTERACTION_EXPECTED` を別々に判定する。unattended runtimeでは `HUMAN_INTERACTION_EXPECTED=false` かつ Adapterがhuman interactionを要求しないことを必要とし、available=false / expected=true は不整合として扱う | setup and runtime classification | execution modeを判定するとき | - | execution interaction mode | `STAGING_SETUP` | 35 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.040` | Candidate discovery | SEQUENCE | setup時に現在利用可能なpersistent noncanonical store候補を探索し、runtime eligibilityを評価する。viable候補が複数ならuserに選択させ、1つならその候補を選択対象とする | setup/adaptation phase | human interaction expected | - | candidate stores | `STAGING_SETUP` | 40 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.050` | Adapter generation | REQUIREMENT | 選択store向けのenvironment-specific staging Adapterをその場で生成し、Project Localから再発見可能にする | setup/adaptation phase | storeを選択した後 | - | staging Adapter | `STAGING_SETUP` | 50 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.060` | Manual smoke test boundary | RULE | interactive chatからのwrite/read-backはsmoke testとして使用してよいが、scheduled acceptanceの代替にしない | adapter validation | manual executionが利用可能 | - | Adapter smoke test | `STAGING_ACCEPTANCE` | 10 | APPROVED | `shgeta/ai-development-sahou#28` |
@@ -67,6 +68,26 @@ AND REVERSIBLE_OR_DISCARDABLE
 ```
 
 `NO_INTERACTIVE_APPROVAL_REQUIRED_NOW` は「以前許可された」ことではなく、**そのruntime executionで追加認証・追加承認・人間対話を要求しない**ことを意味する。
+
+## 4.1 Interaction mode
+
+interactionは次の2軸を分離する。
+
+```text
+HUMAN_INTERACTION_AVAILABLE
+HUMAN_INTERACTION_EXPECTED
+```
+
+典型例:
+
+| available | expected | interpretation |
+|---|---|---|
+| YES | YES | manual interactive setup |
+| YES | NO | autonomous run in interaction-capable environment |
+| NO | NO | scheduled / unattended runtime |
+| NO | YES | contradictory configuration; do not proceed as unattended |
+
+scheduled / unattended acceptanceでは、対話機能が環境に存在するかどうかではなく、そのexecutionが人間対話を要求せず完結することを検証する。
 
 ## 5. Setup / adaptation phase
 
