@@ -1,7 +1,7 @@
 # SAHOU Project Local AISPEC v1.0
 
 - Updated: 2026-10-06
-- Status: PROPOSED
+- Status: APPROVED
 - Scope: SAHOU Commonへproject / environment固有の追加・override・Adapter・certification・configを重ねるproject-scoped layer
 - Relation: SAHOU Common / Task Staging Store AISPEC / PROJECT_BOOTSTRAP
 - Decision: shgeta/ai-development-sahou#28
@@ -11,6 +11,16 @@
 `SAHOU Project Local` は、SAHOU Commonを対象project / environmentへ適用するためのproject-scoped layerである。
 
 `Local` はmachine-localやtemporary filesystemを意味しない。repository内、Persistent Project Store、sidecar workspace等のいずれに存在してもよい。
+
+## 1.1 Semantic rules
+
+| RULE_ID | TITLE | TYPE | MEANING | SCOPE | WHEN | UNLESS | TARGET | STATUS | DECISION_REF |
+|---|---|---|---|---|---|---|---|---|---|
+| `PLATFORM.PROJECT_LOCAL.010` | Project-scoped layer | REQUIREMENT | Project LocalはSAHOU Commonへproject / environment固有の差分を重ねるlayerであり、machine-local temporary workspaceとは区別する | project using SAHOU | Project Localを使用するとき | - | Project Local | APPROVED | `shgeta/ai-development-sahou#28` |
+| `PLATFORM.PROJECT_LOCAL.020` | Explicit override | REQUIREMENT | Commonをoverrideする場合はoverride対象・理由・scopeを追跡可能にし、暗黙上書きを行わない | Project Local overrides | Commonと異なるruleを適用するとき | - | override record | APPROVED | `shgeta/ai-development-sahou#28` |
+| `PLATFORM.PROJECT_LOCAL.030` | Embedded or sidecar | RULE | Project Localはrepository内embeddedでもsidecarでもよく、物理pathではなくPROJECT_BOOTSTRAPからcurrent locationを解決する | Project Local placement | locationを決めるとき | - | Project Local location | APPROVED | `shgeta/ai-development-sahou#28` |
+| `PLATFORM.PROJECT_LOCAL.040` | Compatibility first | RULE | 既存状態を安全に利用できる場合はmigrationを要求せず、必要時だけadditive adaptation、targeted migration、full migrationの順で最小侵襲を優先する | existing projects / repositories | current SAHOUを適用するとき | - | compatibility action | APPROVED | `shgeta/ai-development-sahou#28` |
+
 
 ## 2. Allowed contents
 
@@ -63,7 +73,6 @@ project-local/
 ├─ aispec/
 ├─ adapters/
 │  └─ task-staging/
-├─ certification/
 ├─ migration/
 └─ state/
 ```
