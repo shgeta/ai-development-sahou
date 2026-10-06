@@ -47,7 +47,7 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 - [AISPEC v1.2](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2.md)
 - [Continuous Conversation Distillation shard](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2_SHARD_CONTINUOUS_DISTILLATION.md)
 - [AI開発基盤抽象化 共通仕様 v1.2](specs/platform/AI開発基盤抽象化共通仕様_v1.2.md)
-- [Task Staging Store AISPEC v1.0](specs/platform/TASK_STAGING_STORE_AISPEC_v1.0.md)
+- [Task Staging Store AISPEC v1.1](specs/platform/TASK_STAGING_STORE_AISPEC_v1.1.md)
 - [SAHOU Project Local AISPEC v1.1](specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md)
 
 ### Adapters
