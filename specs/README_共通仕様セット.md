@@ -1,7 +1,7 @@
 # AI共通仕様 / GitHub / AISPEC セット README
 
-- Updated: 2026-09-29
-- Scope: AI/人間がGitHub repository上で仕様を読み、作業し、commit/CIまで安全に進めるための共通仕様セット
+- Updated: 2026-10-06
+- Scope: AI/人間がrepository上で仕様を読み、作業し、commit/CIまで安全に進めるための共通仕様セット
 - Library folder: `/AI共通仕様_GitHub_AISPEC/`
 
 ## 1. このフォルダの役割
@@ -11,11 +11,10 @@
 目的は、次を別々のauthorityとして明示し、会話上の暗黙知へ依存しないこと。
 
 1. 仕様そのものをどう記述・解釈するか
-2. GitHub上の作業をどう開始・記録・commit・CI・引継ぎするか
+2. repository上の作業をどう開始・記録・commit・CI・引継ぎするか
 3. large text / 複数file / 長時間validationをどう安全にcommitするか
-4. Safe Commit Engineを実際にどう使うか
-5. production Web siteの変更履歴をどうappend-onlyで追跡するか
-
+4. production Web site等の変更履歴をどうappend-onlyで追跡するか
+5. scheduled / unattended taskがcanonical authorityを直接変更せず、追加の人間対話なしに結果を永続化するstaging経路をどう構成・検証するか
 
 ## 1.1 Public-safe by construction
 
@@ -40,11 +39,12 @@ SAHOUは原則として**全fileを毎回loadしない**。
 session開始時は次の順で必要moduleを決める。
 
 1. `specs/README_共通仕様セット.md` をrouting indexとして読む。
-2. projectの `PROJECT_BOOTSTRAP` / current spec / Open Issue / taskを確認する。
-3. task triggerに一致するmoduleだけを選択する。
-4. 選択moduleが他moduleをdependencyとして要求する場合、そのclosureだけ追加loadする。
-5. 作業中に新しいtriggerが発生した時だけmoduleを追加する。
-6. exact-SHA cacheがrepository全体を保持していても、snapshot全体をcontextへ展開しない。
+2. projectの `PROJECT_BOOTSTRAP` からProject Localの有無とcurrent locationをresolveし、存在する場合はindex / applicable override / required Adapter referenceだけを読む。
+3. projectのcurrent spec / Open Issue / taskを確認する。
+4. task triggerに一致するmoduleだけを選択する。
+5. 選択moduleが他moduleをdependencyとして要求する場合、そのclosureだけ追加loadする。
+6. 作業中に新しいtriggerが発生した時だけmoduleを追加する。
+7. exact-SHA cacheやProject Localが多数fileを保持していても、全体をcontextへ展開しない。
 
 ### 2.1 Routing table
 
@@ -52,6 +52,8 @@ session開始時は次の順で必要moduleを決める。
 |---|---|
 | GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.16.md` |
 | AISPECの意味変更・closure・RULE_IDを扱う | AISPEC v1.2 + GitHub運用 |
+| Project Localを使用する | `SAHOU_PROJECT_LOCAL_AISPEC_v1.0.md` + Project Local index |
+| scheduled / unattended taskのstaging storeを選定・生成・検証・利用する | `TASK_STAGING_STORE_AISPEC_v1.0.md` + `SAHOU_PROJECT_LOCAL_AISPEC_v1.0.md` + certified project Adapter |
 | durable logを設計・記録する | `LOG_CORE_v1.0.md` |
 | production Web update logを扱う | Log Core + `WEB_UPDATE_LOG_PLUGIN_v1.0.md` |
 | Researchを扱う | Research Core + Research Evidence Core + taskに必要なResearch plugin |
@@ -68,6 +70,9 @@ project固有authority / Open Issue確認はroutingとは別に省略しない�
 | FILE | ROLE | AUTHORITY | 主な対象 |
 |---|---|---|---|
 | `AISPEC_AI仕様記述共通仕様_v1.2.md` | 仕様記述・解釈の共通形式 | 仕様の意味構造 | RULE_ID / TYPE / MEANING / SCOPE / TARGET / CLOSURE / ORDER / DEPENDS_ON / SOURCE / DECISION_REF 等 |
+| `AI開発基盤抽象化共通仕様_v1.1.md` | product非依存platform role | logical capability model | Persistent Store / Task Staging Store / Repository / Tracker / Runner / Adapter role |
+| `TASK_STAGING_STORE_AISPEC_v1.0.md` | unattended task staging | staging store選定・Adapter生成・scheduled acceptance・certification | runtime eligibility / Test Task / cross-run persistence / invalidation / fail-closed |
+| `SAHOU_PROJECT_LOCAL_AISPEC_v1.0.md` | project固有SAHOU layer | Common override / project AISPEC / generated Adapter / certificationの配置・互換性 | embedded / sidecar / compatibility-first / migration boundary |
 | `GITHUB_AI作業運用共通仕様_v1.16.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
 | `LOG_CORE_v1.0.md` | Log Core | durable log共通作法 | append-only / event identity / correction / secret exclusion / persistence safety |
 | `WEB_UPDATE_LOG_PLUGIN_v1.0.md` | Web Update Log Plugin | production Web update history | deployment lifecycle / source / target / execution / validation / rollback |
@@ -84,6 +89,14 @@ AISPECは「仕様をどう表現し、AIがどう解釈するか」を定義す
 
 repositoryのIssue運用やcommit手順そのものは `GITHUB_AI作業運用共通仕様` が担当する。
 
+### Platform / Task Staging / Project Local
+
+`AI開発基盤抽象化共通仕様_v1.1.md` は製品非依存のlogical roleを定義する。
+
+Task Staging Storeはscheduled / unattended task用の非canonical保存roleであり、`TASK_STAGING_STORE_AISPEC_v1.0.md` がsetup、Adapter生成、scheduled acceptance、certification、runtime failureの意味を定義する。
+
+Project LocalはCommonそのものを複製する場所ではなく、project / environment固有の差分・生成Adapter・certification等を保持するlayerである。`Local` はmachine-local temporary workspaceを意味しない。
+
 ### GitHub AI作業運用
 
 GitHub作業では原則として以下をauthorityとする。
@@ -92,27 +105,17 @@ GitHub作業では原則として以下をauthorityとする。
 - AISPECはcurrent semantic authority、Issueはcanonical change unit / semantic decision history、commit/PRはexact diffとする
 - semantic changeはIssueなしのcommitだけで完結させず、AISPEC `DECISION_REF` ↔ Issue affected RULE_IDを双方向に追跡可能にする
 - Issueで作業branch / HEADを確定し、書込み前に現在のcheckout branchとの一致を確認する。local worktree pathはhandoff authorityにしない
-- branchを作成した場合はIssueに Branch Class / Merge Intent / Branch State / Review or Expiry / Keep or Drop Ruleを記録し、mergeするbranchと捨ててよいbranchを明示する
-- 新branch作成前にBranch Drain Gateを行い、MERGE_READYなbranchを先に閉じる。Library Current Stateにはactive branch inventoryとmerge orderをmirrorする
 - HANDOFF専用commitを作らない
 - 重要checkpointはIssueコメントへ残す
 - repository / current spec / current Issueを古い会話より優先する
 - tests / CIをcommit SHAまで追跡する
-- containerの外部アクセス制限時はGitHub Actionsで取得し、repository全体・巨大fileを含めartifactとして回収して作業継続する
-- 重いlocal commandは安全に分離・並行実行し、待ち時間中に依存しない作業を進める
-- pytestはすべての実行経路でproject固有の `PYTHONPATH` を明示し、canonical値をBOOTSTRAPへ記録する
 - projectの継続作業に必要な固定情報を追加・変更した場合、同じ変更単位でPROJECT BOOTSTRAPから到達可能にする
-- Libraryへ保存するuser受領データはrepository / project単位の専用folderへ集約し、同一案件で再利用する
-- GitHub repository全体の再利用snapshotは `/GitHubRepos/<owner>__<repo>/repo-snapshots/` にexact SHA/hash/manifest付きで保持し、artifactは原則30日、Libraryはcurrent + previous 1世代でrotationする
-- project全体とactive Issueのcurrent focus / 順序 / blocker / nextはLibrary Current Stateで共有してよいが、Issueにできる大きさの作業はIssueを主としSTATEだけで抱え続けない
 
 ### Log Core / Plugins
 
 Log Coreはdomain非依存のappend-only / correction / persistence / traceabilityを定義する。ログを扱うtaskでだけloadする。
 
-production Web updateでは `LOG_CORE_v1.0.md` に加えて `WEB_UPDATE_LOG_PLUGIN_v1.0.md` をloadする。read-only preflightはproduction updateそのものではないが、後続deploymentのevidenceとして参照してよい。
-
-他domainのログ作法は将来別pluginとして追加し、Log Coreへdomain語彙を持ち込まない。
+production Web updateでは `LOG_CORE_v1.0.md` に加えて `WEB_UPDATE_LOG_PLUGIN_v1.0.md` をloadする。
 
 ### Research Evidence domain Plugins
 
@@ -125,13 +128,7 @@ Research Core
             -> Raw Material Research Plugin
 ```
 
-- Chemical Research is value-neutral about intended use: it records species identity, transformation, product formation, mass balance, motif retention, and condition-qualified chemical stability.
-- Raw Material Research adds use-context semantics such as intended function, formulation suitability, functional consequence, supplier/specification evidence, sourcing, regulatory applicability, and commercial interpretation.
-- Selecting Raw Material Research MUST load Chemical Research through dependency closure.
-- Selecting Chemical Research alone MUST NOT load Raw Material Research.
-- Physical folder nesting is for discoverability only; the plugin metadata defines semantic dependency.
-
-Paper / Analysis plugins remain orthogonal and are loaded only when their trigger is present.
+Paper / Analysis plugins remain orthogonal and are loaded only when their trigger is present。
 
 ### Safe Commit Engine
 
@@ -143,32 +140,21 @@ Paper / Analysis plugins remain orthogonal and are loaded only when their trigge
 - validationがlocal tool実行枠を超える可能性がある
 - exact HEAD / result hash / changed-path allowlistをtransactionとして固定したい
 
-基本形:
-
-```text
-parallel prepare
-  -> verified patch bundle
-  -> exact HEAD guard
-  -> isolated candidate validation
-  -> single commit
-  -> target fast-forward / push
-```
-
 commit/refを動かすfinal transaction自体は並列化しない。
 
 ## 5. 競合時の優先順位
 
 同一事項について複数の記述がある場合、原則として次で解決する。
 
-1. repositoryのcurrent spec / project固有authority
+1. repositoryのcurrent spec / 明示されたProject Local override / project固有authority
 2. current Open Issueで明示された作業Scope・Acceptance criteria・設計判断
-3. 対象処理に特化した共通仕様（例: `LOG_CORE` + selected plugin, `GITHUB_SAFE_COMMIT_ENGINE_AISPEC`）
+3. 対象処理に特化した共通仕様
 4. 一般的なGitHub作業運用仕様
 5. AISPEC共通記述形式
 6. Reference / example / 非規範の性能観測
 7. 古い会話・古いhandoff・deprecated/history資料
 
-ただし、project固有仕様が共通仕様の安全条件を意図的にoverrideする場合、そのoverrideは明示的に記録する。暗黙の上書きはしない。
+Project LocalがCommonをoverrideする場合、override対象・理由・scopeを明示する。暗黙の上書きはしない。
 
 ## 6. PROJECT BOOTSTRAPからの参照
 
@@ -178,24 +164,12 @@ Bootstrapは最低限次を明示する。
 
 - SAHOU repository / ref
 - routing index
+- Project Local location / mode / index or N/A
 - GitHub work時のGitHub運用spec
 - projectで常用するoptional module
 - task条件付きで読むplugin / specialized spec
 - project固有authority / Current State / Work Item
-
-例:
-
-```text
-Required SAHOU modules:
-- specs/github/GITHUB_AI作業運用共通仕様_v1.16.md
-
-Conditional modules:
-- production web update:
-  - specs/log/LOG_CORE_v1.0.md
-  - specs/web/WEB_UPDATE_LOG_PLUGIN_v1.0.md
-- Safe Commit trigger:
-  - specs/safe-commit/GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md
-```
+- Task Staging Adapter / certificationを使用する場合はそのreference
 
 全文を各projectへ複製せず、必要moduleへの参照を持たせる。
 
@@ -206,6 +180,7 @@ Conditional modules:
 - 旧版は必要に応じて `history/` へ移動する。
 - `DRAFT` / `PROPOSED` / `APPROVED` / `DEPRECATED` 等のstatusは各仕様本文をauthorityとする。
 - Referenceは規範仕様より優先しない。
+- 既存projectのmigrationは自動的な必須処理ではない。安全に互換利用できる場合はno migrationを優先し、必要時のみProject Local adaptationまたは最小targeted migrationを行う。
 
 ## 8. 現行セット
 
@@ -222,6 +197,9 @@ specs/
 │   ├── WEB_UPDATE_LOG_PLUGIN_v1.0.md
 │   └── WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md  # deprecated legacy entrypoint
 ├── platform/
+│   ├── AI開発基盤抽象化共通仕様_v1.1.md
+│   ├── TASK_STAGING_STORE_AISPEC_v1.0.md
+│   ├── SAHOU_PROJECT_LOCAL_AISPEC_v1.0.md
 │   └── SAHOU_SHARED_CACHE_CONTRACT_v1.1.md
 └── safe-commit/
     ├── GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md
@@ -238,8 +216,6 @@ specs/research-evidence/plugins/
     ├── CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md
     └── RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md
 ```
-
-Raw Material is semantically nested under Chemical by explicit dependency, not by folder position alone.
 
 Research / Adapter等はtask trigger時にroutingして読む。
 
