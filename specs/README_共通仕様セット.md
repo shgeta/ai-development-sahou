@@ -64,7 +64,8 @@ session開始時は次の順で必要moduleを決める。
 | 化学物質のidentity / transformation / degradation / stabilityを扱う | Research Core + Research Evidence Core + `specs/research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
 | 原料としての用途・目的機能・処方適性・sourcing/commercial評価を扱う | Chemical Research dependency closure + `specs/research-evidence/plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
 | Safe Commit発動条件に該当する | Safe Commit AISPEC、実操作時のみReference |
-| ChatGPT/GitHub等のproduct mappingが必要 | 対応Adapter |
+| ChatGPT環境でPersistent Project Store / Task Staging Store candidate mappingが必要 | `adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.2.md` |
+| GitHub等その他product mappingが必要 | 対応Adapter |
 | 上記に該当しない | 無関係なoptional moduleをloadしない |
 
 project固有authority / Open Issue確認はroutingとは別に省略しない。
@@ -100,6 +101,8 @@ repositoryのIssue運用やcommit手順そのものは `GITHUB_AI作業運用共
 Task Staging Storeはscheduled / unattended task用の非canonical保存roleであり、`TASK_STAGING_STORE_AISPEC_v1.0.md` がsetup、Adapter生成、scheduled acceptance、certification、runtime failureの意味を定義する。
 
 Project LocalはCommonそのものを複製する場所ではなく、project / environment固有の差分・生成Adapter・certification等を保持するlayerである。`Local` はmachine-local temporary workspaceを意味しない。Commonをbaselineとし、Project Localのexplicit override / mapping / extensionをoverlayした結果をEffective SAHOUとして使用する。
+
+ChatGPT Adapterでは、Task Staging Storeが未設定かつChatGPT Libraryが利用可能な場合、Libraryをproduct-specific default candidateとして最初に評価する。ただしcandidateはcertificationではなく、production利用にはTask Staging Store AISPECに従うscheduled acceptanceとProject Local certificationを必要とする。
 
 ### GitHub AI作業運用
 

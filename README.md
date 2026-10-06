@@ -51,7 +51,7 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 - [SAHOU Project Local AISPEC v1.1](specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md)
 
 ### Adapters
-- [ChatGPT Adapter v1.1](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.1.md)
+- [ChatGPT Adapter v1.2](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.2.md)
 - [GitHub Adapter v1.0](adapters/github/GITHUB_ADAPTER_共通仕様_v1.0.md)
 
 ### GitHub運用
@@ -88,7 +88,7 @@ Coreでは `Persistent Project Store`、`Versioned Repository`、`Work Item Trac
 
 具体的な製品を使う場合はAdapterで対応付けます。たとえば、利用可能なChatGPT環境では `Persistent Project Store` を **ChatGPT Library** に、GitHubを使う環境では `Work Item Tracker` を **GitHub Issues** に対応付けます。
 
-scheduled / unattended task用のwrite destinationは固定製品名で決めず、setup時に現在環境の候補を評価し、必要ならuserが選択してenvironment-specific Adapterを生成します。manual chatでの成功はscheduled runtimeのacceptanceにはならず、本taskとは別のscheduled Test Taskで検証して期限付きcertificationを記録します。
+scheduled / unattended task用のwrite destinationは固定製品名で決めず、setup時に現在環境の候補を評価し、必要ならuserが選択してenvironment-specific Adapterを生成します。ChatGPT Adapterでは、Task Staging Storeが未設定でChatGPT Libraryが利用可能ならLibraryを既定候補として最初に評価します。ただしLibraryが見えるだけではproduction利用せず、本taskとは別のscheduled Test Taskでacceptanceし、期限付きcertificationをProject Localへ記録してから使用します。manual chatでの成功はscheduled runtimeのacceptanceにはなりません。
 
 ## 毎回の開発開始
 
