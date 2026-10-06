@@ -46,9 +46,9 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 ### Core
 - [AISPEC v1.2](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2.md)
 - [Continuous Conversation Distillation shard](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2_SHARD_CONTINUOUS_DISTILLATION.md)
-- [AI開発基盤抽象化 共通仕様 v1.1](specs/platform/AI開発基盤抽象化共通仕様_v1.1.md)
+- [AI開発基盤抽象化 共通仕様 v1.2](specs/platform/AI開発基盤抽象化共通仕様_v1.2.md)
 - [Task Staging Store AISPEC v1.0](specs/platform/TASK_STAGING_STORE_AISPEC_v1.0.md)
-- [SAHOU Project Local AISPEC v1.0](specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.0.md)
+- [SAHOU Project Local AISPEC v1.1](specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md)
 
 ### Adapters
 - [ChatGPT Adapter v1.1](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.1.md)
@@ -102,6 +102,8 @@ PROJECT_BOOTSTRAP
   -> shared exact-SHA snapshotをresolve / integrity確認
   -> routing indexを読む
   -> Project Localをresolve
+  -> Common + explicit Project Local overlayでEffective SAHOUを構成
+  -> 以後のrouting / Adapter / folder-path / authority解決はEffective SAHOUを使用
   -> project固有spec / Current State / Open Work Itemを確認
   -> taskに必要なSAHOU moduleを選ぶ
   -> selected module + dependency closureだけcontextへload
@@ -116,7 +118,7 @@ shared cacheはSAHOUのauthorityではありません。authorityはGitHub repos
 
 `SAHOU_FULL.md` のような派生統合fileは作りません。cacheはexact repository snapshotそのものを保持できますが、session contextへはroutingで選ばれたmoduleだけを展開します。
 
-Project Localの推奨embedded locationは `<repo>/.sahou/project-local/` です。ただしthird-party repository等でtarget repositoryを変更したくない場合はsidecar配置を使用できます。既存repositoryへのmigrationは必須ではなく、`no migration -> additive Project Local adaptation -> targeted migration -> full migration` の順で最小侵襲を優先します。
+Project Localの推奨embedded locationは `<repo>/.sahou/project-local/` です。ただしthird-party repository等でtarget repositoryを変更したくない場合はsidecar配置を使用できます。Commonをbaselineとし、Project Localのexplicit override / mapping / extensionをoverlayしたものをそのprojectのEffective SAHOUとして使います。既存repositoryではmigration回避自体を目的にせず、migration / Project Local adaptation / hybridのcost・risk・保守性を比較して選びます。
 
 ## SAHOU自体の開発
 
