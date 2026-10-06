@@ -16,15 +16,18 @@
 
 1. `shgeta/ai-development-sahou` のtarget refからexact commit SHAを確認する。
 2. shared cacheの同一SHA snapshotをresolveし、integrityを確認する。miss時だけexact repository snapshotを取得・更新する。
-3. routing indexを読む。
-4. このBootstrapからProject Localの有無とcurrent locationをresolveし、存在する場合はそのindex / applicable override / required Adapter referenceだけを読む。
-5. project固有authority、Current State、Open Work Item、actual taskを確認する。
-6. Required SAHOU modulesをloadする。
-7. task triggerに一致するConditional modulesだけをloadする。
-8. selected moduleの明示dependency closureだけを追加loadする。
-9. cache snapshot全体やProject Local全体をconversation contextへ展開しない。
-10. 作業中に新しいtriggerが発生した時だけ追加moduleをloadする。
-11. `SAHOU_FULL.md` 等の派生full bundleをauthorityとして使用しない。
+3. routing indexを読み、Common SAHOUをbaselineとして必要moduleを特定する。
+4. このBootstrapからProject Localの有無とcurrent locationをresolveする。
+5. Project Localが存在する場合は、index / applicable explicit override / mapping / extension / required Adapter referenceだけを読む。
+6. Common SAHOUへProject Localのexplicit overlayを適用し、このprojectのEffective SAHOUを構成する。Project LocalがN/Aなら Common SAHOU をそのままEffective SAHOUとする。
+7. 以後のrouting、Adapter解決、folder/path解決、authority解決はEffective SAHOUに従う。
+8. project固有authority、Current State、Open Work Item、actual taskを確認する。
+9. Required SAHOU modulesをloadする。
+10. task triggerに一致するConditional modulesだけをloadする。
+11. selected moduleの明示dependency closureだけを追加loadする。
+12. cache snapshot全体やProject Local全体をconversation contextへ展開しない。
+13. 作業中に新しいtriggerが発生した時だけ追加moduleをloadする。
+14. `SAHOU_FULL.md` 等の派生full bundleをauthorityとして使用しない。
 
 ## SAHOU Project Local
 
@@ -33,10 +36,13 @@ Project Localを使わないprojectは `N/A` とする。
 - Project Local: `<path or persistent reference or N/A>`
 - Project Local mode: `embedded | sidecar | N/A`
 - Project Local index: `<reference or N/A>`
+- Effective SAHOU: `Common only | Common + Project Local overlay`
 - Task Staging Adapter: `<adapter reference or N/A>`
 - Task Staging Certification: `<certification reference or N/A>`
 
-Project Localの `Local` はmachine-local temporary workspaceを意味しない。Common override、project固有AISPEC、environment-specific Adapter、certification等のproject-scoped layerとして扱う。
+Project Localの `Local` はmachine-local temporary workspaceを意味しない。Common override、project固有AISPEC、physical/logical mapping、environment-specific Adapter、certification等のproject-scoped layerとして扱う。
+
+Commonはbaselineであり、Project Localのexplicit override / mapping / extensionをoverlayした結果をこのprojectのEffective SAHOUとする。implicit overrideは適用しない。
 
 Task Staging Adapterを使用する場合、runtimeはvalid certificationを確認してから使用し、各taskごとにstoreを再選定しない。certificationがexpired / invalid、またはproduction writeが失敗した場合は再検証へ送る。
 
@@ -53,10 +59,10 @@ projectで使うものだけ残す / 追加する。
 - AISPEC semantic work:
   - `specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2.md`
 - Project Local:
-  - `specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.0.md`
+  - `specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md`
 - scheduled / unattended task staging:
   - `specs/platform/TASK_STAGING_STORE_AISPEC_v1.0.md`
-  - `specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.0.md`
+  - `specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md`
   - projectのcertified Task Staging Adapter
 - durable log:
   - `specs/log/LOG_CORE_v1.0.md`
