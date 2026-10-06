@@ -33,6 +33,7 @@ conversation
        -> CI / tests / Work Item
   -> unattended intermediate resultが必要な場合
        -> certified Task Staging Store Adapter
+       -> 未certifiedならenvironment default noncanonical fallback
   -> durable loggingが必要な場合
        -> Log Core + selected plugin
 ```
@@ -47,11 +48,11 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 - [AISPEC v1.2](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2.md)
 - [Continuous Conversation Distillation shard](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2_SHARD_CONTINUOUS_DISTILLATION.md)
 - [AI開発基盤抽象化 共通仕様 v1.2](specs/platform/AI開発基盤抽象化共通仕様_v1.2.md)
-- [Task Staging Store AISPEC v1.1](specs/platform/TASK_STAGING_STORE_AISPEC_v1.1.md)
+- [Task Staging Store AISPEC v1.2](specs/platform/TASK_STAGING_STORE_AISPEC_v1.2.md)
 - [SAHOU Project Local AISPEC v1.1](specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md)
 
 ### Adapters
-- [ChatGPT Adapter v1.2](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.2.md)
+- [ChatGPT Adapter v1.3](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.3.md)
 - [GitHub Adapter v1.0](adapters/github/GITHUB_ADAPTER_共通仕様_v1.0.md)
 
 ### GitHub運用
@@ -88,7 +89,7 @@ Coreでは `Persistent Project Store`、`Versioned Repository`、`Work Item Trac
 
 具体的な製品を使う場合はAdapterで対応付けます。たとえば、利用可能なChatGPT環境では `Persistent Project Store` を **ChatGPT Library** に、GitHubを使う環境では `Work Item Tracker` を **GitHub Issues** に対応付けます。
 
-scheduled / unattended task用のwrite destinationは固定製品名で決めず、setup時に現在環境の候補を評価し、必要ならuserが選択してenvironment-specific Adapterを生成します。durable outputを持つproduction taskを作成・再有効化する場合は、**taskをenableする前に**Project Localからvalid certified Task Staging Adapterを解決します。未certifiedならproduction taskを先にenableせず、別のscheduled Test Taskによるacceptanceを先に完了します。ChatGPT Adapterでは、Task Staging Storeが未設定でChatGPT Libraryが利用可能ならLibraryを既定候補として最初に評価します。ただしLibraryが見えるだけではproduction利用せず、本taskとは別のscheduled Test Taskでacceptanceし、期限付きcertificationをProject Localへ記録してから使用します。manual chatでの成功はscheduled runtimeのacceptanceにはなりません。
+scheduled / unattended task用のwrite destinationは固定製品名で決めません。valid certified Task Staging Adapterがあればそれを最優先で使います。未certifiedでも、結果を失うことを避けるため、environmentが定義するdefault noncanonical staging storeへそのrunの結果を退避してよく、保存状態は `DEFAULT_FALLBACK_SAVED` としてcertified stagingやcanonical ingestionから区別します。default fallbackが利用できない場合だけ他のeligible noncanonical候補へ進み、canonical authorityへ自動fallbackしません。ChatGPT Adapterでは、ChatGPT Libraryが利用可能かつ現在write可能ならdefault fallbackとして使えます。scheduled Test TaskによるacceptanceとProject Local certificationは並行して後から進め、PASS後の実行からcertified Adapterを優先します。
 
 ## 毎回の開発開始
 
