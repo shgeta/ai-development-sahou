@@ -57,14 +57,14 @@ session開始時は次の順で必要moduleを決める。
 | GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.16.md` |
 | AISPECの意味変更・closure・RULE_IDを扱う | AISPEC v1.2 + GitHub運用 |
 | Project Localを使用する | `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` + Project Local index |
-| scheduled / unattended production taskを作成・再有効化する、またはstaging storeを選定・生成・検証・利用する | `TASK_STAGING_STORE_AISPEC_v1.1.md` + `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` + certified project Adapter |
+| scheduled / unattended production taskを作成・再有効化する、またはstaging storeを選定・生成・検証・fallback利用する | `TASK_STAGING_STORE_AISPEC_v1.2.md` + `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` + product Adapter + project Adapter/certification if available |
 | durable logを設計・記録する | `LOG_CORE_v1.0.md` |
 | production Web update logを扱う | Log Core + `WEB_UPDATE_LOG_PLUGIN_v1.0.md` |
 | Researchを扱う | Research Core + Research Evidence Core + taskに必要なResearch plugin |
 | 化学物質のidentity / transformation / degradation / stabilityを扱う | Research Core + Research Evidence Core + `specs/research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
 | 原料としての用途・目的機能・処方適性・sourcing/commercial評価を扱う | Chemical Research dependency closure + `specs/research-evidence/plugins/chemical/RAW_MATERIAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
 | Safe Commit発動条件に該当する | Safe Commit AISPEC、実操作時のみReference |
-| ChatGPT環境でPersistent Project Store / Task Staging Store candidate mappingが必要 | `adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.2.md` |
+| ChatGPT環境でPersistent Project Store / Task Staging Store candidate mappingが必要 | `adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.3.md` |
 | GitHub等その他product mappingが必要 | 対応Adapter |
 | 上記に該当しない | 無関係なoptional moduleをloadしない |
 
@@ -76,7 +76,7 @@ project固有authority / Open Issue確認はroutingとは別に省略しない�
 |---|---|---|---|
 | `AISPEC_AI仕様記述共通仕様_v1.2.md` | 仕様記述・解釈の共通形式 | 仕様の意味構造 | RULE_ID / TYPE / MEANING / SCOPE / TARGET / CLOSURE / ORDER / DEPENDS_ON / SOURCE / DECISION_REF 等 |
 | `AI開発基盤抽象化共通仕様_v1.2.md` | product非依存platform role | logical capability model | Persistent Store / Task Staging Store / Repository / Tracker / Runner / Adapter role |
-| `TASK_STAGING_STORE_AISPEC_v1.1.md` | unattended task staging | production task creation gate + staging store選定・Adapter生成・scheduled acceptance・certification | creation/re-enable gate / runtime eligibility / Test Task / cross-run persistence / invalidation / fail-closed |
+| `TASK_STAGING_STORE_AISPEC_v1.2.md` | unattended task staging | certified staging優先 + environment default fallback + Adapter生成・scheduled acceptance・certification | route selection / default fallback / runtime eligibility / Test Task / cross-run persistence / invalidation / fail-closed |
 | `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` | project固有SAHOU layer | Common override / project AISPEC / generated Adapter / certificationの配置・互換性 | embedded / sidecar / compatibility-first / migration boundary |
 | `GITHUB_AI作業運用共通仕様_v1.16.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
 | `LOG_CORE_v1.0.md` | Log Core | durable log共通作法 | append-only / event identity / correction / secret exclusion / persistence safety |
@@ -98,11 +98,11 @@ repositoryのIssue運用やcommit手順そのものは `GITHUB_AI作業運用共
 
 `AI開発基盤抽象化共通仕様_v1.2.md` は製品非依存のlogical roleを定義する。
 
-Task Staging Storeはscheduled / unattended task用の非canonical保存roleであり、`TASK_STAGING_STORE_AISPEC_v1.1.md` がproduction task creation/re-enable gate、setup、Adapter生成、scheduled acceptance、certification、runtime failureの意味を定義する。
+Task Staging Storeはscheduled / unattended task用の非canonical保存roleであり、`TASK_STAGING_STORE_AISPEC_v1.2.md` がcertified route優先、environment default fallback、setup、Adapter生成、scheduled acceptance、certification、runtime failureの意味を定義する。
 
 Project LocalはCommonそのものを複製する場所ではなく、project / environment固有の差分・生成Adapter・certification等を保持するlayerである。`Local` はmachine-local temporary workspaceを意味しない。Commonをbaselineとし、Project Localのexplicit override / mapping / extensionをoverlayした結果をEffective SAHOUとして使用する。
 
-ChatGPT Adapterでは、Task Staging Storeが未設定かつChatGPT Libraryが利用可能な場合、Libraryをproduct-specific default candidateとして最初に評価する。ただしcandidateはcertificationではなく、production利用にはTask Staging Store AISPECに従うscheduled acceptanceとProject Local certificationを必要とする。
+ChatGPT Adapterでは、valid certified Task Staging Adapterがなく、ChatGPT Libraryが利用可能かつ現在write可能なら、Libraryをproduct-specific default noncanonical fallbackとして使ってよい。fallback保存は `DEFAULT_FALLBACK_SAVED` とし、certified staging / canonical ingestionと区別する。certificationは後からscheduled acceptanceで取得し、その後の実行で優先利用する。
 
 ### GitHub AI作業運用
 
@@ -246,7 +246,7 @@ specs/
 │   └── WEB_SITE_UPDATE_LOG_共通仕様_v1.0.md  # deprecated legacy entrypoint
 ├── platform/
 │   ├── AI開発基盤抽象化共通仕様_v1.2.md
-│   ├── TASK_STAGING_STORE_AISPEC_v1.1.md
+│   ├── TASK_STAGING_STORE_AISPEC_v1.2.md
 │   ├── SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md
 │   └── SAHOU_SHARED_CACHE_CONTRACT_v1.1.md
 └── safe-commit/
