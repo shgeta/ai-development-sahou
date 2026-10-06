@@ -36,7 +36,7 @@ stagingへ保存されたという事実だけで、canonical data / canonical e
 | `PLATFORM.STAGING.040` | Candidate discovery | SEQUENCE | setup時に現在利用可能なpersistent noncanonical store候補を探索し、runtime eligibilityを評価する。viable候補が複数ならuserに選択させ、1つならその候補を選択対象とする | setup/adaptation phase | human interaction expected | - | candidate stores | `STAGING_SETUP` | 40 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.050` | Adapter generation | REQUIREMENT | 選択store向けのenvironment-specific staging Adapterをその場で生成し、Project Localから再発見可能にする | setup/adaptation phase | storeを選択した後 | - | staging Adapter | `STAGING_SETUP` | 50 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.060` | Manual smoke test boundary | RULE | interactive chatからのwrite/read-backはsmoke testとして使用してよいが、scheduled acceptanceの代替にしない | adapter validation | manual executionが利用可能 | - | Adapter smoke test | `STAGING_ACCEPTANCE` | 10 | APPROVED | `shgeta/ai-development-sahou#28` |
-| `PLATFORM.STAGING.070` | Separate scheduled test task | REQUIREMENT | 本taskとは別のTest Taskを作成し、environmentが許す最短の通常scheduler intervalで発動させ、通常scheduled executionをacceptance authorityとする | scheduled acceptance | Adapterをproductionで使う前 | scheduled execution機能自体が存在しない場合 | Test Task | `STAGING_ACCEPTANCE` | 20 | APPROVED | `shgeta/ai-development-sahou#28` |
+| `PLATFORM.STAGING.070` | Separate scheduled test task | REQUIREMENT | 本taskとは別のTest Taskを作成し、environmentが許す最短の通常scheduler intervalで発動させ、通常scheduled executionをacceptance authorityとする。Test TaskはAdapter probeだけを行い、research / production processing / canonical writeを行わない | scheduled acceptance | Adapterをproductionで使う前 | scheduled execution機能自体が存在しない場合 | Test Task | `STAGING_ACCEPTANCE` | 20 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.080` | Immediate trigger limitation | PROHIBITION | `Run now` 等のmanual immediate triggerだけをscheduled runtime equivalenceの証拠としてacceptしない | scheduled acceptance | immediate/manual triggerを使用したとき | - | acceptance evidence | `STAGING_ACCEPTANCE` | 30 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.090` | Acceptance verification | VALIDATION | scheduled Test Taskはprobe write、rediscovery、read-back、identity/payload/checksum一致、追加human interaction不要、append safety、failure reporting、canonical isolationを検証する | scheduled acceptance | Test Task実行時 | capabilityが適用不能な個別testは理由を記録 | Adapter | `STAGING_ACCEPTANCE` | 40 | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.STAGING.100` | Cross-run persistence | VALIDATION | persistenceを主張する場合はwriteしたexecutionとは独立した後続executionからprobeをrediscover/readできることを確認する | persistent staging | persistenceをcertifyするとき | store自体がsingle-run用途として明示される場合 | persisted probe | `STAGING_ACCEPTANCE` | 50 | APPROVED | `shgeta/ai-development-sahou#28` |
@@ -146,6 +146,9 @@ certification recordの推奨項目:
 adapter_id: <id>
 adapter_version: <version>
 environment: <runtime identity>
+test_task_ref: <scheduled test task identity>
+scheduled_run_ref: <acceptance run identity>
+probe_packet_id: <probe identity>
 validated_at: <timestamp>
 valid_until: <timestamp>
 status: READY | INVALID | REVALIDATE
