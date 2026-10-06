@@ -47,7 +47,7 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 - [AISPEC v1.2](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2.md)
 - [Continuous Conversation Distillation shard](specs/aispec/AISPEC_AI仕様記述共通仕様_v1.2_SHARD_CONTINUOUS_DISTILLATION.md)
 - [AI開発基盤抽象化 共通仕様 v1.2](specs/platform/AI開発基盤抽象化共通仕様_v1.2.md)
-- [Task Staging Store AISPEC v1.0](specs/platform/TASK_STAGING_STORE_AISPEC_v1.0.md)
+- [Task Staging Store AISPEC v1.1](specs/platform/TASK_STAGING_STORE_AISPEC_v1.1.md)
 - [SAHOU Project Local AISPEC v1.1](specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md)
 
 ### Adapters
@@ -88,7 +88,7 @@ Coreでは `Persistent Project Store`、`Versioned Repository`、`Work Item Trac
 
 具体的な製品を使う場合はAdapterで対応付けます。たとえば、利用可能なChatGPT環境では `Persistent Project Store` を **ChatGPT Library** に、GitHubを使う環境では `Work Item Tracker` を **GitHub Issues** に対応付けます。
 
-scheduled / unattended task用のwrite destinationは固定製品名で決めず、setup時に現在環境の候補を評価し、必要ならuserが選択してenvironment-specific Adapterを生成します。ChatGPT Adapterでは、Task Staging Storeが未設定でChatGPT Libraryが利用可能ならLibraryを既定候補として最初に評価します。ただしLibraryが見えるだけではproduction利用せず、本taskとは別のscheduled Test Taskでacceptanceし、期限付きcertificationをProject Localへ記録してから使用します。manual chatでの成功はscheduled runtimeのacceptanceにはなりません。
+scheduled / unattended task用のwrite destinationは固定製品名で決めず、setup時に現在環境の候補を評価し、必要ならuserが選択してenvironment-specific Adapterを生成します。durable outputを持つproduction taskを作成・再有効化する場合は、**taskをenableする前に**Project Localからvalid certified Task Staging Adapterを解決します。未certifiedならproduction taskを先にenableせず、別のscheduled Test Taskによるacceptanceを先に完了します。ChatGPT Adapterでは、Task Staging Storeが未設定でChatGPT Libraryが利用可能ならLibraryを既定候補として最初に評価します。ただしLibraryが見えるだけではproduction利用せず、本taskとは別のscheduled Test Taskでacceptanceし、期限付きcertificationをProject Localへ記録してから使用します。manual chatでの成功はscheduled runtimeのacceptanceにはなりません。
 
 ## 毎回の開発開始
 

@@ -61,7 +61,7 @@ ChatGPT Libraryはproduct-level candidate mappingであり、projectごとのcon
 
 ChatGPT Adapterを使用し、かつChatGPT Libraryが利用可能な環境では、projectのCurrent State、再利用価値のあるinput、snapshot、artifact等をChatGPT Libraryへ保存してよい。
 
-ChatGPT Libraryが利用できない環境では、その存在を仮定せず、Persistent Project Storeについてはprojectが使用する別storeへfallbackする。Task Staging Storeについてはcanonical authorityへfallbackせず、`TASK_STAGING_STORE_AISPEC_v1.0.md` に従って別のeligible noncanonical candidateを探索する。
+ChatGPT Libraryが利用できない環境では、その存在を仮定せず、Persistent Project Storeについてはprojectが使用する別storeへfallbackする。Task Staging Storeについてはcanonical authorityへfallbackせず、`TASK_STAGING_STORE_AISPEC_v1.1.md` に従って別のeligible noncanonical candidateを探索する。
 
 公開仕様では `Library` 単独ではなく、製品固有機能を指す場合は `ChatGPT Library` と明記する。
 
@@ -102,7 +102,7 @@ SAHOU共通仕様repositoryを利用する場合の標準例:
 
 ChatGPT AdapterはLibraryをdefault candidateとして提示するところまでをproduct-specific defaultとする。
 
-production用Task Staging Storeとしての採用authorityは `TASK_STAGING_STORE_AISPEC_v1.0.md` にあり、最低限次を満たす必要がある。
+production用Task Staging Storeとしての採用authorityは `TASK_STAGING_STORE_AISPEC_v1.1.md` にある。durable outputを持つproduction scheduled taskはcreate/re-enable前にvalid certification付きAdapterを解決し、未certifiedならseparate Test Task acceptanceを先に完了する。加えて最低限次を満たす必要がある。
 
 - current runtimeでwrite capabilityが利用可能
 - per-actionの追加認証・追加承認・人間対話を要求しない

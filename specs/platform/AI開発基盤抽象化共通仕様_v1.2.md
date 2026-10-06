@@ -81,7 +81,7 @@ Adapterは少なくとも以下を宣言する。
 - known limitation
 - fallback
 
-Task Staging Store Adapterは追加で、runtime write eligibility、non-interactive behavior、canonical isolation、rediscovery/read-back、certification状態を宣言する。詳細は `TASK_STAGING_STORE_AISPEC_v1.0.md` をauthorityとする。
+Task Staging Store Adapterは追加で、runtime write eligibility、non-interactive behavior、canonical isolation、rediscovery/read-back、certification状態を宣言する。詳細は `TASK_STAGING_STORE_AISPEC_v1.1.md` をauthorityとする。
 
 ## 6. SAHOU Project Local
 

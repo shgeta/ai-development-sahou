@@ -44,7 +44,7 @@ Project Localの `Local` はmachine-local temporary workspaceを意味しない�
 
 Commonはbaselineであり、Project Localのexplicit override / mapping / extensionをoverlayした結果をこのprojectのEffective SAHOUとする。implicit overrideは適用しない。
 
-Task Staging Adapterを使用する場合、runtimeはvalid certificationを確認してから使用し、各taskごとにstoreを再選定しない。certificationがexpired / invalid、またはproduction writeが失敗した場合は再検証へ送る。
+durable outputを持つscheduled / unattended production taskを作成または再有効化する場合は、taskをenableする前にTask Staging Adapterとvalid certificationを確認する。存在しない / expired / invalid / REVALIDATEの場合はproduction taskを先にenableせず、Adapter setupとseparate scheduled Test Taskによるacceptanceを先に完了する。read-only / no durable output taskのみ明示的にgate N/Aとできる。runtimeではvalid certification付きAdapterを使用し、各taskごとにstoreを再選定しない。production writeが失敗した場合は再検証へ送る。
 
 ## SAHOU modules
 
@@ -61,7 +61,7 @@ projectで使うものだけ残す / 追加する。
 - Project Local:
   - `specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md`
 - scheduled / unattended task staging:
-  - `specs/platform/TASK_STAGING_STORE_AISPEC_v1.0.md`
+  - `specs/platform/TASK_STAGING_STORE_AISPEC_v1.1.md`
   - `specs/platform/SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md`
   - projectのcertified Task Staging Adapter
 - durable log:
