@@ -22,7 +22,7 @@
 | `PLATFORM.PROJECT_LOCAL.030` | Embedded or sidecar | RULE | Project Localはrepository内embeddedでもsidecarでもよく、物理pathではなくPROJECT_BOOTSTRAPからcurrent locationを解決する | Project Local placement | locationを決めるとき | - | Project Local location | APPROVED | `shgeta/ai-development-sahou#28` |
 | `PLATFORM.PROJECT_LOCAL.040` | Compatibility choice | RULE | 既存repositoryへcurrent SAHOUを適用する際はmigration回避自体を目的にせず、migration cost / Project Local adaptation cost / riskを比較し、最も単純・安全・保守しやすい方法を選ぶ | existing projects / repositories | current SAHOUを適用するとき | - | compatibility action | APPROVED | `shgeta/ai-development-sahou#30` |
 | `PLATFORM.PROJECT_LOCAL.050` | Effective SAHOU overlay | REQUIREMENT | Common SAHOUをbaselineとし、Project Localの明示override / mapping / extensionをoverlayしてそのprojectのEffective SAHOUを構成する。Project Localがない場合はCommon SAHOUをそのままEffective SAHOUとする | SAHOU-managed project | startup / restart時 | - | Effective SAHOU | APPROVED | `shgeta/ai-development-sahou#30` |
-| `PLATFORM.PROJECT_LOCAL.060` | Physical mapping | REQUIREMENT | Commonが想定するlogical roleとactual projectのfolder / file / entrypoint / authority locationが異なる場合、migrationしない選択を取るならProject Local AISPECにexplicit mappingを記録する | existing / third-party projects | physical layout差分をProject Localで吸収するとき | - | project-local mapping | APPROVED | `shgeta/ai-development-sahou#30` |
+| `PLATFORM.PROJECT_LOCAL.060` | Physical mapping | REQUIREMENT | Commonが想定するlogical roleとactual projectのfolder / file / entrypoint / authority locationが異なり、その差分の全部または一部をProject Localで吸収する場合はProject Local AISPECにexplicit mappingを記録する | existing / third-party projects | physical layout差分をProject Localで吸収するとき | - | project-local mapping | APPROVED | `shgeta/ai-development-sahou#30` |
 | `PLATFORM.PROJECT_LOCAL.070` | Effective use | REQUIREMENT | Effective SAHOU構成後のrouting、Adapter解決、folder/path解決、authority解決はCommon単体ではなくEffective SAHOUに従う | startup and runtime | Effective SAHOU構成後 | - | runtime interpretation | APPROVED | `shgeta/ai-development-sahou#30` |
 | `PLATFORM.PROJECT_LOCAL.080` | Hybrid adaptation | RULE | 差分の一部をmigrationし、残りをProject Local mapping / overrideで吸収するhybridを許可する | existing projects | hybridが単純・安全・保守しやすい場合 | - | compatibility action | APPROVED | `shgeta/ai-development-sahou#30` |
 
@@ -33,6 +33,7 @@ Project Localには次を保持してよい。
 
 - Common ruleの明示override
 - project固有AISPEC / rule
+- physical / logical mapping
 - environment-specific Adapter
 - Adapter certification / test history
 - project固有config / stateへのreference
