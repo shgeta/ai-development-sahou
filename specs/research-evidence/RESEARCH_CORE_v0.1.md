@@ -82,7 +82,7 @@ Exploratory work may begin from an ENTITY, SOURCE, anomaly, dataset, code path, 
 
 ## 3.1 Scope anchor and scope-drift guardrail
 
-Each active research QUESTION SHOULD maintain a **Scope Anchor**: the current authoritative definition of the research universe, inclusion/exclusion boundary, and decision target.
+Each active research QUESTION MUST maintain a **Scope Anchor**: the current authoritative definition of the research universe, inclusion/exclusion boundary, and decision target.
 
 Examples:
 - all formulation-ready raw-material candidates;
@@ -102,7 +102,7 @@ Rules:
    - extract != the definition of raw material;
    - one paper’s botanical candidates != all candidates;
    - one tool’s supported entities != the research universe.
-6. When the user corrects scope, that correction SHOULD update durable current-state records / plan / issue notes so later turns do not regress to the prior scope.
+6. When the user corrects scope, the active Scope Anchor MUST be updated immediately. Any maintained durable current-state records, plans, or Issue notes MUST reflect that correction; prior narrower outputs MUST be relabeled as subset passes where applicable, so later work does not regress to the incorrect scope.
 7. Before changing the candidate universe, distinguish:
    - **scope decision**: intentional change to the Scope Anchor;
    - **subset activity**: temporary narrowing for one pass;
@@ -110,7 +110,7 @@ Rules:
 
 ### Scope-drift check
 
-Before presenting a “complete”, “overall”, “all candidates”, “master”, or equivalent synthesis, verify:
+Before presenting a “complete”, “overall”, “all candidates”, “master”, or equivalent synthesis, the researcher MUST verify:
 
 - What is the current Scope Anchor?
 - Did the current activity cover the entire anchored universe?
