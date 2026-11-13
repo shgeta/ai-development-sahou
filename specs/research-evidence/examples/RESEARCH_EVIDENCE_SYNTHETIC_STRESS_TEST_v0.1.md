@@ -547,7 +547,7 @@ Round 1:
 - Q.E receives a stability pass;
 - Q.F receives a regulation/sourcing pass.
 
-Issue/current state records:
+Immediately after Q.D's bounded pass, before the Q.E and Q.F passes, Issue/current state records:
 
 ```text
 Current round: 1
@@ -568,7 +568,7 @@ Next lanes:
 - synthesis checkpoint
 ```
 
-After the synthesis checkpoint, Q.D may become high priority again if the final safety conclusion depends on it.
+After Q.E and Q.F receive their bounded passes, a synthesis checkpoint may reveal that Q.D is decision-critical; Q.D may then become high priority again.
 
 ### 15.3 Legitimate fixation exception
 
