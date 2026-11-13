@@ -80,6 +80,179 @@ Not every research task requires every step.
 
 Exploratory work may begin from an ENTITY, SOURCE, anomaly, dataset, code path, visual difference, or other seed and later create a QUESTION.
 
+## 3.1 Scope anchor and scope-drift guardrail
+
+Each active research QUESTION MUST maintain a **Scope Anchor**: the current authoritative definition of the research universe, inclusion/exclusion boundary, and decision target.
+
+Examples:
+- all formulation-ready raw-material candidates;
+- all implementations under a named runtime;
+- all publications satisfying a stated population/intervention criterion.
+
+A Scope Anchor is not replaced merely because the current activity is narrower.
+
+Rules:
+
+1. A source subset, search result set, paper-specific candidate list, plugin output, or local work queue is a **working subset**, not a new research universe.
+2. A working subset MUST NOT silently replace the Scope Anchor.
+3. A follow-up such as “find suppliers”, “compare products”, “validate implementations”, or “continue the search” MUST resolve its target set from the Scope Anchor unless the user explicitly narrows scope.
+4. If only a subset is being processed, the activity/output MUST be labeled as a subset pass and MUST NOT be presented as a complete audit of the anchored universe.
+5. Classification convenience MUST NOT become an implicit exclusion rule. Examples:
+   - pure compound != research-only by definition;
+   - extract != the definition of raw material;
+   - one paper’s botanical candidates != all candidates;
+   - one tool’s supported entities != the research universe.
+6. When the user corrects scope, the active Scope Anchor MUST be updated immediately. Any maintained durable current-state records, plans, or Issue notes MUST reflect that correction; prior narrower outputs MUST be relabeled as subset passes where applicable, so later work does not regress to the incorrect scope.
+7. Before changing the candidate universe, distinguish:
+   - **scope decision**: intentional change to the Scope Anchor;
+   - **subset activity**: temporary narrowing for one pass;
+   - **evidence result**: findings from that subset.
+
+### Scope-drift check
+
+Before presenting a “complete”, “overall”, “all candidates”, “master”, or equivalent synthesis, the researcher MUST verify:
+
+- What is the current Scope Anchor?
+- Did the current activity cover the entire anchored universe?
+- If not, is the result clearly labeled as partial/subset?
+- Did any recent source or paper accidentally redefine the candidate universe?
+- Did a storage or schema category accidentally become an inclusion/exclusion criterion?
+
+Failure to preserve this distinction is a research-process error even when every individual fact is correct.
+
+## 3.2 Breadth-first + berrypicking exploration and fixation guardrail
+
+### Exploration modes
+
+Research Core provides two standard exploration modes plus user-directed custom exploration.
+
+1. **BREADTH_FIRST_BERRYPICKING** — default
+   - breadth-first traversal across the active QUESTION / lane set;
+   - berrypicking expands later passes from newly discovered terms, citations, authors, entities, methods, patents, suppliers, regulations, and related leads;
+   - use when the research surface is still being mapped or when multiple lanes remain material.
+
+2. **DEPTH_FIRST**
+   - follow one selected QUESTION / lane deeply before returning to the broader lane set;
+   - use when the user explicitly wants a focused deep dive or when one lane is an acknowledged blocking dependency;
+   - the Scope Anchor remains unchanged unless the user also changes scope.
+
+3. **OTHER / CUSTOM**
+   - any user-directed exploration strategy that does not fit the two standard modes;
+   - examples may include systematic-review style protocols, fixed citation chasing, exhaustive registry sweeps, hypothesis-driven searches, or other task-specific methods;
+   - the user instruction defines the exploration method for that task.
+
+If the user does not choose a mode, use **BREADTH_FIRST_BERRYPICKING**.
+
+Techniques such as citation chasing, hypothesis testing, decision prioritization, source-class switching, and systematic search MAY be invoked inside either standard mode or under OTHER / CUSTOM when explicitly useful.
+
+Default exploration strategy is **breadth-first + berrypicking**.
+
+- **breadth-first** defines the traversal cadence: visit the active QUESTION / lane set in bounded passes before repeatedly deepening one lane.
+- **berrypicking** defines how the search surface expands: each useful source may expose new terms, authors, citations, entities, methods, patents, suppliers, regulations, or hypotheses that become candidates for later passes.
+
+Research exploration SHOULD therefore continue autonomously across the active QUESTION / lane set, while using newly discovered leads to expand the search surface.
+
+Rounds are an organizational aid, not a mandatory stopping boundary.
+Exploration SHOULD NOT stop merely because one nominal round has completed if useful unexplored leads remain.
+
+The purpose is not to prevent deep investigation or force periodic stopping.
+The purpose is to avoid fixation while allowing the search vocabulary, lane structure and source graph to keep expanding from what is learned.
+
+Default pattern:
+
+```text
+Scope Anchor
+  -> identify active lanes / QUESTIONS
+  -> round N:
+       -> breadth-first bounded pass across material lanes
+       -> collect berrypicking leads from each pass
+       -> add / reprioritize candidate terms, sources, entities and relations
+       -> update evidence / gaps / priorities
+  -> update the map continuously
+  -> keep exploring while useful leads remain
+  -> use synthesis checkpoints when helpful
+  -> later passes expand from the updated map
+     or deliberate deep-dive when justified
+```
+
+Rules:
+
+1. **Breadth before fixation.** When several active lanes remain material to the decision, traversal SHOULD be breadth-first by default; a single unresolved lane SHOULD NOT absorb repeated consecutive search passes merely because it is unresolved.
+2. Each lane pass SHOULD be **bounded** by a practical search budget such as:
+   - a defined query family,
+   - a defined source class,
+   - a defined number of citation hops,
+   - a defined method/test,
+   - or another explicit stopping condition.
+3. If a bounded pass does not close the lane, record it as **PARKED / OPEN / REVIEW_REQUIRED** as appropriate, preserve the search path, and continue to the next material lane.
+4. A parked lane SHOULD be revisited when:
+   - a later source creates a new lead,
+   - another lane reveals a dependency,
+   - synthesis shows the lane is decision-critical,
+   - the user explicitly prioritizes it,
+   - or exploration naturally returns to that area in a later pass.
+5. A lane MAY receive an immediate additional deep-dive when it is a **blocking dependency** for the next material decision. The reason for breaking round-robin cadence SHOULD be explicit in Issue/current-state history.
+6. Round-robin order is not fixed. It MAY be reprioritized by:
+   - decision impact,
+   - evidence gap severity,
+   - dependency order,
+   - expected information gain,
+   - user priority,
+   - source availability.
+7. Repeated failure on the same source route SHOULD NOT cause indefinite retries. Mark the route as attempted, preserve the result, and change lane or route.
+8. Later passes SHOULD continue from the Scope Anchor and current QUESTION set, enriched by berrypicking leads from prior work, not merely from the most recently unresolved item.
+
+### Issue / work-item support
+
+For substantial research, the Work Item / Issue SHOULD preserve enough state to resume exploration without fixation:
+
+- **Current pass / exploration state** — brief description of where the search currently is;
+- **Active lanes / QUESTIONS** — material lanes still in play;
+- **Parked** — unresolved items intentionally deferred after a bounded pass;
+- **Revisit trigger** — what would justify returning to each parked item;
+- **New leads / berries** — newly discovered terms, sources, entities, relations, or hypotheses;
+- **Next lanes** — where exploration can continue.
+
+These are continuation aids, not mandatory pause points.
+
+These fields do not need to be a rigid schema.
+A concise Issue comment or current-state section is sufficient.
+
+### Fixation check
+
+Before running another consecutive deep search on the same unresolved item, ask:
+
+- Is this item blocking the next decision?
+- Have the other material lanes in the current round received a reasonable pass?
+- Is there a new lead, method, or source route?
+- Would another attempt materially increase information, or merely repeat the same search?
+- Should this item be parked and revisited after the next synthesis checkpoint?
+
+Failure mode:
+research remains factually careful but becomes inefficient and locally overfit because one hard-to-close gap receives unlimited attention while other decision-relevant lanes remain underexplored.
+
+### User steering
+
+Exploration is expected to keep moving unless:
+- the user asks to pause or synthesize,
+- a decision requires explicit confirmation,
+- the task reaches a natural closure,
+- or no material new route remains.
+
+User intervention may:
+- correct the Scope Anchor,
+- add or remove a lane,
+- reprioritize lanes,
+- switch exploration mode,
+- request a deep dive,
+- or redefine the decision target.
+
+Such steering SHOULD update durable current state so subsequent exploration follows the corrected axes.
+
+Default principle:
+
+> **Keep exploring; let user steering reshape the axes rather than requiring the user to repeatedly restart exploration.**
+
 ## 4. Evidence semantics
 
 Research Core uses Research Evidence Core as the common evidence/provenance model.
@@ -262,6 +435,13 @@ A Research Core implementation should preserve at least these distinctions:
 - analysis method != research question
 - Research != Literature Research only
 - Research != Analytics only
+- working subset != Scope Anchor
+- source-specific candidate set != research universe
+- classification convenience != exclusion criterion
+- unresolved lane != automatic next action
+- parked != abandoned
+- breadth-first traversal != fixed search vocabulary
+- berrypicking expansion != silent scope expansion
 
 ## 12. Current architecture
 
