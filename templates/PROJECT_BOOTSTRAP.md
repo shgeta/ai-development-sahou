@@ -50,7 +50,7 @@ durable outputを持つscheduled / unattended production taskでは、まずvali
 
 ### Required for GitHub work
 
-- `specs/github/GITHUB_AI作業運用共通仕様_v1.16.md`
+- `specs/github/GITHUB_AI作業運用共通仕様_v1.17.md`
 
 ### Conditional
 
@@ -67,6 +67,11 @@ projectで使うものだけ残す / 追加する。
   - projectのTask Staging Adapter / certification（存在する場合）
 - durable log:
   - `specs/log/LOG_CORE_v1.0.md`
+- Decision Journal (adopted projects only):
+  - `specs/log/LOG_CORE_v1.0.md`
+  - `specs/log/DECISION_JOURNAL_PLUGIN_v0.1.md`
+  - conflict時: `specs/log/DECISION_CONFLICT_RESOLUTION_v0.1.md`
+  - snapshot/replay時: `specs/log/DECISION_SNAPSHOT_v0.1.md`
 - production Web update log:
   - `specs/log/LOG_CORE_v1.0.md`
   - `specs/web/WEB_UPDATE_LOG_PLUGIN_v1.0.md`
@@ -104,6 +109,17 @@ durable logを使うprojectだけ記載する。対象外なら `N/A`。
 - Writer: `<workflow/tool/store append mechanism or N/A>`
 - Concurrency control: `<serialization/atomic append/create-only/HEAD guard or N/A>`
 - Logging failure recovery: `<procedure or N/A>`
+
+## Decision Journal (optional)
+
+決定ログを採用するprojectだけ記載する。未採用なら `N/A`。Journalはcurrent AISPECやIssueなどの正本を置き換えない。
+
+- Decision Journal: `enabled | N/A`
+- Canonical event store / schema: `<locator or N/A>`
+- Authority mapping / scope resolver: `<references or N/A>`
+- Event reader / writer / concurrency control: `<references or N/A>`
+- Snapshot / projector version: `<references or N/A>`
+- Failure recovery / reconciliation: `<procedure or N/A>`
 
 ## Project-specific guardrails
 

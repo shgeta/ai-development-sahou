@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1",
+  "snapshot_id": "snap-example-005",
+  "created_at_utc": "2026-11-19T06:05:00Z",
+  "source_store_ref": "repo:example/decisions/events",
+  "source_revision": "example-store-rev-17",
+  "included_event_ids": [
+    "evt-a01",
+    "evt-a02",
+    "evt-a03",
+    "evt-a04",
+    "evt-a05"
+  ],
+  "event_set_sha256": "154355b41ce19395fbbe2bd9ac0f71cc0dd2596a6cd084b923da85159d35e171",
+  "projection_version": "0.1",
+  "scope_resolver_version": "simple-dimensions-v0.1",
+  "authority_map_revision": "example-authority-v1",
+  "current_decisions": [
+    {
+      "decision_id": "evt-a04",
+      "scope": {
+        "subject_ref": "component:example-caption",
+        "dimensions": {
+          "environment": "qa"
+        }
+      },
+      "authority_ref": "spec:example-caption-rule",
+      "state": "CURRENT"
+    }
+  ],
+  "unresolved_conflicts": [],
+  "pending_applications": []
+}

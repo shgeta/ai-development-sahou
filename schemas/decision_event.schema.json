@@ -1,0 +1,381 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schema/decision_event.v0.1.json",
+  "title": "Decision Journal Event v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_id",
+    "stream_id",
+    "decision_key",
+    "event_type",
+    "occurred_at_utc",
+    "scope",
+    "summary",
+    "authority_ref",
+    "based_on",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stream_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "enum": [
+        "DECIDED",
+        "REJECTED",
+        "DEFERRED",
+        "NO_CHANGE",
+        "REVOKED",
+        "CORRECTION",
+        "CONFLICT_DETECTED",
+        "CONFLICT_RESOLVED",
+        "APPLIED",
+        "APPLY_FAILED"
+      ]
+    },
+    "occurred_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "subject_ref",
+        "dimensions"
+      ],
+      "properties": {
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dimensions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "scope_model_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "based_on": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "authorized_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supersedes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "correction_of": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "conflict_participants": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "resolution_of": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resolution_strategy": {
+      "enum": [
+        "KEEP_ONE",
+        "SPLIT_SCOPE",
+        "COMPOSE",
+        "REVISE",
+        "DEFER"
+      ]
+    },
+    "applies_decision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verification_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "scope_resolver_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recorded_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "project_extension": {
+      "type": "object"
+    },
+    "observed_authority_revision": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "DECIDED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "authorized_by"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "reason"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "DEFERRED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "reason"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "NO_CHANGE"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "based_on": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "authorized_by",
+          "supersedes"
+        ],
+        "properties": {
+          "supersedes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "CORRECTION"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "correction_of",
+          "reason"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "CONFLICT_DETECTED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "conflict_participants",
+          "reason"
+        ],
+        "properties": {
+          "conflict_participants": {
+            "minItems": 2
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "CONFLICT_RESOLVED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "resolution_of",
+          "conflict_participants",
+          "resolution_strategy",
+          "authorized_by",
+          "reason"
+        ],
+        "properties": {
+          "conflict_participants": {
+            "minItems": 2
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "APPLIED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "applies_decision",
+          "target_revision",
+          "verification_refs"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "APPLY_FAILED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "applies_decision",
+          "reason"
+        ]
+      }
+    }
+  ],
+  "additionalProperties": false
+}

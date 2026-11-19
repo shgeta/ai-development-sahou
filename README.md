@@ -17,6 +17,7 @@ AIと人間が継続的に開発するための、仕様記述・作業管理・
 - **SAHOU Project Local**: project / environment固有のCommon override、AISPEC、生成Adapter、certification等を保持するlayer
 - **Log Core**: domain非依存のappend-only / correction / persistence / traceability作法
 - **Log Plugin**: Web update等、必要なdomainだけCoreへ追加する
+- **Decision Journal**: 決定を追記型のチャンクとして記録し、scope・authority・因果関係により競合統合と現在状態の再構成を行う（採用projectのみ）
 - **Safe Commit Engine**: 大きな変更をfull-file replacementに頼らず、安全なpatch bundleとして適用する
 
 ## 基本フロー
@@ -56,13 +57,16 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 - [GitHub Adapter v1.0](adapters/github/GITHUB_ADAPTER_共通仕様_v1.0.md)
 
 ### GitHub運用
-- [GitHub AI作業運用 共通仕様 v1.16](specs/github/GITHUB_AI作業運用共通仕様_v1.16.md)
+- [GitHub AI作業運用 共通仕様 v1.17](specs/github/GITHUB_AI作業運用共通仕様_v1.17.md)
 - [Conversation-to-Authority Sync](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_CONVERSATION_SYNC.md)
 - [Status + Issue Binding](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_STATUS_ISSUE_BINDING.md)
 - [Issue Outcome Retention](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_ISSUE_OUTCOME_RETENTION.md)
 
 ### Log
 - [Log Core v1.0](specs/log/LOG_CORE_v1.0.md)
+- [Decision Journal Plugin v0.1](specs/log/DECISION_JOURNAL_PLUGIN_v0.1.md)
+- [Decision Conflict Resolution v0.1](specs/log/DECISION_CONFLICT_RESOLUTION_v0.1.md)
+- [Decision Snapshot & Replay v0.1](specs/log/DECISION_SNAPSHOT_v0.1.md)
 
 ### Web運用
 - [Web Update Log Plugin v1.0](specs/web/WEB_UPDATE_LOG_PLUGIN_v1.0.md)

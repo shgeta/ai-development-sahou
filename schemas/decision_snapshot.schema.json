@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schema/decision_snapshot.v0.1.json",
+  "title": "Decision Journal Snapshot v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "created_at_utc",
+    "source_store_ref",
+    "source_revision",
+    "included_event_ids",
+    "event_set_sha256",
+    "projection_version",
+    "scope_resolver_version",
+    "authority_map_revision",
+    "current_decisions",
+    "unresolved_conflicts",
+    "pending_applications"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "source_store_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "included_event_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "event_set_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "projection_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_resolver_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_map_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "current_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "decision_id",
+          "scope",
+          "authority_ref",
+          "state"
+        ],
+        "properties": {
+          "decision_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "type": "object",
+            "required": [
+              "subject_ref",
+              "dimensions"
+            ],
+            "properties": {
+              "subject_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dimensions": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "authority_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "enum": [
+              "CURRENT",
+              "DECIDED_NOT_APPLIED",
+              "PARTIALLY_SUPERSEDED",
+              "SUPERSEDED",
+              "REVOKED",
+              "BLOCKED_BY_CONFLICT",
+              "APPLY_FAILED",
+              "UNKNOWN_APPLY"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "unresolved_conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "conflict_event_id",
+          "participant_ids",
+          "scope",
+          "reason"
+        ],
+        "properties": {
+          "conflict_event_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "participant_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 2
+          },
+          "scope": {
+            "type": "object",
+            "required": [
+              "subject_ref",
+              "dimensions"
+            ],
+            "properties": {
+              "subject_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dimensions": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "pending_applications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "decision_id",
+          "state"
+        ],
+        "properties": {
+          "decision_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "enum": [
+              "DECIDED_NOT_APPLIED",
+              "APPLY_FAILED",
+              "UNKNOWN_APPLY"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "replay_cursor": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

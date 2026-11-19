@@ -1,0 +1,135 @@
+[
+  {
+    "schema_version": "0.1",
+    "stream_id": "example:project:typography",
+    "decision_key": "typography:punctuation-spacing",
+    "scope": {
+      "subject_ref": "component:example-caption",
+      "dimensions": {
+        "environment": "qa"
+      }
+    },
+    "authority_ref": "spec:example-caption-rule",
+    "evidence_refs": [
+      "https://example.invalid/evidence/qa-screenshot-1"
+    ],
+    "event_id": "evt-a01",
+    "event_type": "DECIDED",
+    "occurred_at_utc": "2026-11-19T06:00:00Z",
+    "summary": "条件QAでは方式Aを採用する",
+    "based_on": [],
+    "authorized_by": "role:spec-owner"
+  },
+  {
+    "schema_version": "0.1",
+    "stream_id": "example:project:typography",
+    "decision_key": "typography:punctuation-spacing",
+    "scope": {
+      "subject_ref": "component:example-caption",
+      "dimensions": {
+        "environment": "qa"
+      }
+    },
+    "authority_ref": "spec:example-caption-rule",
+    "evidence_refs": [
+      "https://example.invalid/evidence/qa-screenshot-1"
+    ],
+    "event_id": "evt-a02",
+    "event_type": "DECIDED",
+    "occurred_at_utc": "2026-11-19T06:01:00Z",
+    "summary": "条件QAでは方式Bを採用する",
+    "based_on": [],
+    "authorized_by": "role:spec-owner"
+  },
+  {
+    "schema_version": "0.1",
+    "stream_id": "example:project:typography",
+    "decision_key": "typography:punctuation-spacing",
+    "scope": {
+      "subject_ref": "component:example-caption",
+      "dimensions": {
+        "environment": "qa"
+      }
+    },
+    "authority_ref": "spec:example-caption-rule",
+    "evidence_refs": [
+      "https://example.invalid/evidence/qa-screenshot-1"
+    ],
+    "event_id": "evt-a03",
+    "event_type": "CONFLICT_DETECTED",
+    "occurred_at_utc": "2026-11-19T06:02:00Z",
+    "summary": "同一scopeで方式Aと方式Bが競合",
+    "based_on": [
+      "evt-a01",
+      "evt-a02"
+    ],
+    "conflict_participants": [
+      "evt-a01",
+      "evt-a02"
+    ],
+    "reason": "同一の描画条件で両方は適用できない"
+  },
+  {
+    "schema_version": "0.1",
+    "stream_id": "example:project:typography",
+    "decision_key": "typography:punctuation-spacing",
+    "scope": {
+      "subject_ref": "component:example-caption",
+      "dimensions": {
+        "environment": "qa"
+      }
+    },
+    "authority_ref": "spec:example-caption-rule",
+    "evidence_refs": [
+      "https://example.invalid/evidence/qa-screenshot-1"
+    ],
+    "event_id": "evt-a04",
+    "event_type": "CONFLICT_RESOLVED",
+    "occurred_at_utc": "2026-11-19T06:03:00Z",
+    "summary": "方式Aを採用し、方式Bは採用しない",
+    "based_on": [
+      "evt-a01",
+      "evt-a02",
+      "evt-a03"
+    ],
+    "conflict_participants": [
+      "evt-a01",
+      "evt-a02"
+    ],
+    "resolution_of": "evt-a03",
+    "resolution_strategy": "KEEP_ONE",
+    "supersedes": [
+      "evt-a01",
+      "evt-a02"
+    ],
+    "authorized_by": "role:spec-owner",
+    "reason": "仕様の基準画像と一致するため"
+  },
+  {
+    "schema_version": "0.1",
+    "stream_id": "example:project:typography",
+    "decision_key": "typography:punctuation-spacing",
+    "scope": {
+      "subject_ref": "component:example-caption",
+      "dimensions": {
+        "environment": "qa"
+      }
+    },
+    "authority_ref": "spec:example-caption-rule",
+    "evidence_refs": [
+      "https://example.invalid/evidence/qa-screenshot-1"
+    ],
+    "event_id": "evt-a05",
+    "event_type": "APPLIED",
+    "occurred_at_utc": "2026-11-19T06:04:00Z",
+    "summary": "統合判断を現行仕様へ反映し検証した",
+    "based_on": [
+      "evt-a04"
+    ],
+    "applies_decision": "evt-a04",
+    "target_revision": "example-spec-rev-17",
+    "verification_refs": [
+      "https://example.invalid/ci/run-17"
+    ]
+  }
+]

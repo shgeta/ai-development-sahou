@@ -28,7 +28,7 @@
 - 共通仕様へ昇格させる場合は、project固有identifierを除去し、一般化したrule / patternだけを移す。
 - 「公開時に後で消す」運用を採用せず、常時public-safeであることを要求する。
 
-詳細なguardrailは `GITHUB_AI作業運用共通仕様_v1.16.md` の `Common specification public-safety rule` をauthorityとする。
+詳細なguardrailは `GITHUB_AI作業運用共通仕様_v1.17.md` の `Common specification public-safety rule` をauthorityとする。
 
 ### 1.2 AISPECのphysical model
 
@@ -54,11 +54,14 @@ session開始時は次の順で必要moduleを決める。
 
 | Trigger | Load |
 |---|---|
-| GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.16.md` |
+| GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.17.md` |
 | AISPECの意味変更・closure・RULE_IDを扱う | AISPEC v1.2 + GitHub運用 |
 | Project Localを使用する | `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` + Project Local index |
 | scheduled / unattended production taskを作成・再有効化する、またはstaging storeを選定・生成・検証・fallback利用する | `TASK_STAGING_STORE_AISPEC_v1.2.md` + `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` + product Adapter + project Adapter/certification if available |
 | durable logを設計・記録する | `LOG_CORE_v1.0.md` |
+| 決定の追記ログを導入・利用・復元する | `LOG_CORE_v1.0.md` + `DECISION_JOURNAL_PLUGIN_v0.1.md` |
+| 決定ログの競合を検出・統合する | 上記 + `DECISION_CONFLICT_RESOLUTION_v0.1.md` |
+| 決定ログのsnapshot/replayを使用する | 上記 + `DECISION_SNAPSHOT_v0.1.md` |
 | production Web update logを扱う | Log Core + `WEB_UPDATE_LOG_PLUGIN_v1.0.md` |
 | Researchを扱う | Research Core + Research Evidence Core + taskに必要なResearch plugin |
 | 化学物質のidentity / transformation / degradation / stabilityを扱う | Research Core + Research Evidence Core + `specs/research-evidence/plugins/chemical/CHEMICAL_RESEARCH_SCHEMA_PLUGIN_v0.1.md` |
@@ -78,8 +81,11 @@ project固有authority / Open Issue確認はroutingとは別に省略しない�
 | `AI開発基盤抽象化共通仕様_v1.2.md` | product非依存platform role | logical capability model | Persistent Store / Task Staging Store / Repository / Tracker / Runner / Adapter role |
 | `TASK_STAGING_STORE_AISPEC_v1.2.md` | unattended task staging | certified staging優先 + environment default fallback + Adapter生成・scheduled acceptance・certification | route selection / default fallback / runtime eligibility / Test Task / cross-run persistence / invalidation / fail-closed |
 | `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` | project固有SAHOU layer | Common override / project AISPEC / generated Adapter / certificationの配置・互換性 | embedded / sidecar / compatibility-first / migration boundary |
-| `GITHUB_AI作業運用共通仕様_v1.16.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
+| `GITHUB_AI作業運用共通仕様_v1.17.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
 | `LOG_CORE_v1.0.md` | Log Core | durable log共通作法 | append-only / event identity / correction / secret exclusion / persistence safety |
+| `DECISION_JOURNAL_PLUGIN_v0.1.md` | Decision Journal | 決定ログのdomain plugin | decision chunks / causality / applied state / authority |
+| `DECISION_CONFLICT_RESOLUTION_v0.1.md` | Decision Conflict | 決定ログ統合時 | overlap / merge / unresolved conflict / no last-write-wins |
+| `DECISION_SNAPSHOT_v0.1.md` | Decision Snapshot | 決定再生時 | derived snapshot / verified replay / recovery |
 | `WEB_UPDATE_LOG_PLUGIN_v1.0.md` | Web Update Log Plugin | production Web update history | deployment lifecycle / source / target / execution / validation / rollback |
 | `GITHUB_SAFE_COMMIT_ENGINE_AISPEC_v1.2.md` | Safe Commit Engineの規範仕様 | large/multi-file commit transaction | parallel prepare / HEAD guard / hash / allowlist / validation / single commit |
 | `GITHUB_SAFE_COMMIT_ENGINE_REFERENCE_v1.1.md` | 実装・操作Reference | 非規範の実行説明 | CLI / GitHub Actions / executor / performance observation / limitation |
@@ -209,7 +215,7 @@ Bootstrapは最低限次を明示する。
 
 ```text
 Required SAHOU modules:
-- specs/github/GITHUB_AI作業運用共通仕様_v1.16.md
+- specs/github/GITHUB_AI作業運用共通仕様_v1.17.md
 
 Conditional modules:
 - production web update:
@@ -238,7 +244,7 @@ specs/
 ├── aispec/
 │   └── AISPEC_AI仕様記述共通仕様_v1.2.md
 ├── github/
-│   └── GITHUB_AI作業運用共通仕様_v1.16.md
+│   └── GITHUB_AI作業運用共通仕様_v1.17.md
 ├── log/
 │   └── LOG_CORE_v1.0.md
 ├── web/
