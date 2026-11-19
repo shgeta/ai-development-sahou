@@ -1,0 +1,31 @@
+name: Decision Journal synthetic fixture validation
+
+on:
+  pull_request:
+    paths:
+      - "specs/log/DECISION_*.md"
+      - "schemas/decision_*.json"
+      - "examples/decision-journal/**"
+      - ".github/workflows/decision-journal-fixtures.yml"
+  push:
+    branches: [main]
+    paths:
+      - "schemas/decision_*.json"
+      - "examples/decision-journal/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install validator
+        run: python -m pip install jsonschema==4.23.0
+      - name: Validate synthetic Decision Journal fixtures
+        run: python examples/decision-journal/validate_examples.py
