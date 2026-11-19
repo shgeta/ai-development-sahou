@@ -967,6 +967,8 @@ GitHub Issueを、
 
 Issueは作業状態とsemantic decision historyを伝える記録であり、repositoryの実体やcurrent AISPEC/current specを上書きするauthorityではない。
 
+projectが判断の種類ごとにIssue-firstを明示した場合、そのIssueは当該種類の決定記録の正本となり得る。ただし、これはcurrent AISPEC/current specやrepositoryの実装を無条件に上書きする意味ではない。決定正本と実装の実体・反映状態を区別し、適用scopeとprojectの明示authorityに基づいて照合する。
+
 矛盾が見つかった場合は、まずcurrent repository stateとcurrent specを確認する。ただし「current specが正しい」と自動決定してIssueだけを書き換えない。仕様自体が誤っている可能性がある場合は、current RULE_IDの `SOURCE / DECISION_REF` からdecision historyを確認し、必要なら新しいIssueで再検証する。
 
 ## 11. Validation checklist

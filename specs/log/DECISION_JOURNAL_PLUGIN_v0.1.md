@@ -16,22 +16,22 @@ Journal採用時のevent storeは**構造化された決定イベントのcanoni
 
 | RULE_ID | 意味 | 依存 |
 |---|---|---|
-| `DECISION.JOURNAL.010` | 決定は永続的な記録から再発見でき、正本と根拠を参照できる | `LOG.CORE.010,.100` |
-| `DECISION.JOURNAL.020` | 過去イベントを消去・上書きせず、訂正・取消・置換を新イベントとして追記する | `LOG.CORE.020,.060` |
-| `DECISION.JOURNAL.030` | `event_id` と安定した `decision_key`、`stream_id`、`scope` を保持する | `LOG.CORE.030,.040` |
-| `DECISION.JOURNAL.040` | `based_on` / `supersedes` / `correction_of` / `resolution_of` で因果関係を保持する | `.030` |
-| `DECISION.JOURNAL.050` | 決定権限を確認しない候補・提案を `DECIDED` として記録しない | `.010` |
-| `DECISION.JOURNAL.060` | 最新時刻・ファイル順だけで決定の優先順位を決めない | `.040` |
-| `DECISION.JOURNAL.070` | 決定成立 `DECIDED` と正本反映完了 `APPLIED` を分離する | `LOG.CORE.130,.140` |
-| `DECISION.JOURNAL.080` | `APPLIED` はexact target revisionと検証証拠がある場合だけ記録する | `.070` |
-| `DECISION.JOURNAL.090` | authorityは既存のprojectルールに従い、Journalを暗黙の上位authorityとしない | `.010` |
-| `DECISION.JOURNAL.100` | 新規判断前に関連する過去判断の有効性・範囲・根拠を照合する。Closed Issueも含める | `.030` |
-| `DECISION.JOURNAL.110` | 競合検出・統合はConflict Resolution規則に従う | `.030` |
-| `DECISION.JOURNAL.120` | snapshotは元イベントから検証・再構成可能である | `.030` |
+| `DECISION.JOURNAL.010` | 決定は永続的な記録から再発見でき、正本と根拠を参照できる | `LOG.CORE.010, LOG.CORE.100` |
+| `DECISION.JOURNAL.020` | 過去イベントを消去・上書きせず、訂正・取消・置換を新イベントとして追記する | `LOG.CORE.020, LOG.CORE.060` |
+| `DECISION.JOURNAL.030` | `event_id` と安定した `decision_key`、`stream_id`、`scope` を保持する | `LOG.CORE.030, LOG.CORE.040` |
+| `DECISION.JOURNAL.040` | `based_on` / `supersedes` / `correction_of` / `resolution_of` で因果関係を保持する | `DECISION.JOURNAL.030` |
+| `DECISION.JOURNAL.050` | 決定権限を確認しない候補・提案を `DECIDED` として記録しない | `DECISION.JOURNAL.010` |
+| `DECISION.JOURNAL.060` | 最新時刻・ファイル順だけで決定の優先順位を決めない | `DECISION.JOURNAL.040` |
+| `DECISION.JOURNAL.070` | 決定成立 `DECIDED` と正本反映完了 `APPLIED` を分離する | `LOG.CORE.130, LOG.CORE.140` |
+| `DECISION.JOURNAL.080` | `APPLIED` はexact target revisionと検証証拠がある場合だけ記録する | `DECISION.JOURNAL.070` |
+| `DECISION.JOURNAL.090` | authorityは既存のprojectルールに従い、Journalを暗黙の上位authorityとしない | `DECISION.JOURNAL.010` |
+| `DECISION.JOURNAL.100` | 新規判断前に関連する過去判断の有効性・範囲・根拠を照合する。GitHub利用時は関連Closed Issueも対象とする | `DECISION.JOURNAL.030` |
+| `DECISION.JOURNAL.110` | 競合検出・統合はConflict Resolution規則に従う | `DECISION.JOURNAL.030` |
+| `DECISION.JOURNAL.120` | snapshotは元イベントから検証・再構成可能である | `DECISION.JOURNAL.030` |
 | `DECISION.JOURNAL.130` | ログ保存失敗、正本反映失敗、検証失敗を区別し、成功を偽装しない | `LOG.CORE.140` |
 | `DECISION.JOURNAL.140` | concurrency対策にatomic append / create-only event / HEAD guardなどを使う | `LOG.CORE.120` |
 | `DECISION.JOURNAL.150` | BootstrapまたはProject Localからstore、authority mapping、reader/writer、recoveryへ到達できる | `LOG.CORE.010` |
-| `DECISION.JOURNAL.160` | Write Lock、read-only、権限不足では書込みをせず、非canonical draftと区別する | `.070` |
+| `DECISION.JOURNAL.160` | Write Lock、read-only、権限不足では書込みをせず、非canonical draftと区別する | `DECISION.JOURNAL.070` |
 
 ## 3. イベントの同一性とscope
 
