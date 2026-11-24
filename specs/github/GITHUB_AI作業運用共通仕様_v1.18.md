@@ -750,7 +750,7 @@ project__sample-analysis/
 - 元file名は可能な限り保持する。
 - 同名fileがあり内容が異なる場合、黙ってoverwriteせず、日付・revision・short hash等のsuffixで一意化する。明示的なversion replacementの場合のみ既存fileを更新する。
 - user受領データを保存するときは、現在のrepository / project identityを先に解決してから保存先を決める。
-- GitHub repositoryが後から作成されたprojectは、同一案件であることが確認できれば既存project folderをrepository canonical folderへrename / migrateし、二重管理を避ける。
+- GitHub repositoryが後から作成されたprojectは、同一案件であることを確認し、既存bindingを維持したままlogical identityを解決する。物理rename / migrateが必要な場合は、明示的な移行判断、選択Adapterの対応operation、移行先のidentity / access / payload検証、read-backを要求する。検証完了前に移行元を削除せず、二重管理を避ける。
 - project folder内でさらに分類が必要な場合は `inputs/`, `reference/`, `qa/`, `artifacts/` 等のsubfolderを作ってよいが、project root外へ散らさない。
 - project固有データを共通仕様folder、store root、別project folderへ混在させない。
 - sourceがuser提供、GitHub、Actions artifact、外部download等のどれかを後で区別する必要がある場合、filename、manifest、index file等でprovenanceを追跡可能にする。

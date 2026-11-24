@@ -49,6 +49,24 @@ representation: page-markdown | exact-file
 
 必要なIDは現在のlisting / get / read結果または検証済みbindingから取得する。Page IDとSpace IDを互換としない。paginationを処理し、結果がpartialなら不存在と断定しない。個人領域・workspace-private領域・共有Spaceを同一scopeとしない。既存のfile/folderを扱う場合は、対応するfile操作経路も候補として解決する。
 
+### Operation capability map
+
+以下はlogical operationと実行時に確認するSpace capabilityの対応であり、固定tool名や全runtimeでの提供を保証しない。
+
+| Operation | Required capability / guard |
+|---|---|
+| Resolve / list | 許可されたSpace / Page / file discovery、pagination、stable identity照合 |
+| Read Page | 対象Pageと必要なcontent / revision metadataの取得 |
+| Create Page | 認可されたparent / Space内でのcreate、unique identityまたはidempotency、再発見 |
+| Update Page | 対象限定のedit / patch、fresh block/hashまたはrevision guard、conflict検出 |
+| Write file | 対象payloadの元byteを保存可能なfile operation、format/size、file identity確認 |
+| Read file | 目的に必要なrepresentationを取得。exact-file用途では元byte再取得とhash照合 |
+| Delete / rotate | 対象identity・削除権限・明示されたlifecycle policyを確認。current pointerと検証済み新snapshotを確保するまでは旧snapshotを削除しない |
+| Inspect access | Page/Spaceと対象fileの必要なaccess情報・ancestor・workspace policyを確認 |
+| Change access / move | 保存とは別のoperation。明示的な意図、権限、影響範囲、結果の確認が必要 |
+
+必要なoperationが利用不能なら、そのroleについて不適格とし、適格な代替routeまたはunsupportedを返す。他roleの対応可否は独立して判定する。
+
 ## 3. Access boundary
 
 | RULE_ID | TITLE | TYPE | MEANING | STATUS | DECISION_REF |
