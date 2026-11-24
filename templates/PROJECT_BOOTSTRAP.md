@@ -50,7 +50,7 @@ durable outputを持つscheduled / unattended production taskでは、まずvali
 
 ### Required for GitHub work
 
-- `specs/github/GITHUB_AI作業運用共通仕様_v1.17.md`
+- `specs/github/GITHUB_AI作業運用共通仕様_v1.18.md`
 
 ### Conditional
 
@@ -95,8 +95,12 @@ projectで使うものだけ残す / 追加する。
 - Repository: `<owner>/<repo>`
 - Default branch: `<branch>`
 - Project spec: `<path or reference>`
+- Persistent Project Store: `<adapter + stable project root locator or N/A>`
 - Current State: `<persistent-store reference>`
+- Reusable snapshot: `<exact-byte store locator / workflow or N/A>`
 - Work Item Tracker: `<tracker reference>`
+
+ChatGPT環境ではrouting index §2.2によりLibrary Adapter / Space Adapterを独立して解決する。既存のlocatorと適格なbindingを維持し、UI名の変更だけで移行・複製しない。Page ID、file identity等の物理locatorは使用Adapterに従う。
 
 ## Durable log
 
