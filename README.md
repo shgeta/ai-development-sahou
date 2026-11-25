@@ -54,11 +54,11 @@ Task Staging Storeへの保存はcanonical ingestionではありません。stag
 
 ### Adapters
 - [ChatGPT Library Adapter v1.3](adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.3.md)
-- [ChatGPT Space Adapter v1.0](adapters/chatgpt/CHATGPT_SPACE_ADAPTER_共通仕様_v1.0.md)
+- [ChatGPT Space Adapter v1.1](adapters/chatgpt/CHATGPT_SPACE_ADAPTER_共通仕様_v1.1.md)
 - [GitHub Adapter v1.0](adapters/github/GITHUB_ADAPTER_共通仕様_v1.0.md)
 
 ### GitHub運用
-- [GitHub AI作業運用 共通仕様 v1.18](specs/github/GITHUB_AI作業運用共通仕様_v1.18.md)
+- [GitHub AI作業運用 共通仕様 v1.19](specs/github/GITHUB_AI作業運用共通仕様_v1.19.md)
 - [Conversation-to-Authority Sync](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_CONVERSATION_SYNC.md)
 - [Status + Issue Binding](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_STATUS_ISSUE_BINDING.md)
 - [Issue Outcome Retention](specs/github/GITHUB_AI作業運用共通仕様_v1.15_SHARD_ISSUE_OUTCOME_RETENTION.md)

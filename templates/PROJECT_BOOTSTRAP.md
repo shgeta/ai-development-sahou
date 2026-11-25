@@ -50,7 +50,7 @@ durable outputを持つscheduled / unattended production taskでは、まずvali
 
 ### Required for GitHub work
 
-- `specs/github/GITHUB_AI作業運用共通仕様_v1.18.md`
+- `specs/github/GITHUB_AI作業運用共通仕様_v1.19.md`
 
 ### Conditional
 
@@ -93,11 +93,13 @@ projectで使うものだけ残す / 追加する。
 ## Project identity
 
 - Repository: `<owner>/<repo>`
+- Project slug: `<stable slug for misc-hosted or repository-less project, otherwise N/A>`
+- Logical project root: `<GitHub work spec §4.5 logical root>`
 - Default branch: `<branch>`
 - Project spec: `<path or reference>`
-- Persistent Project Store: `<adapter + stable project root locator or N/A>`
+- Persistent Project Store: `<adapter + stable project root locator or N/A; Spaceの場合はverified Space ID / root Page ID / observed display name>`
 - Current State: `<persistent-store reference>`
-- Reusable snapshot: `<exact-byte store locator / workflow or N/A>`
+- Reusable snapshot: `<repository-level exact-byte store locator / workflow or N/A; misc内の個別project slugはsnapshot rootに付与しない>`
 - Work Item Tracker: `<tracker reference>`
 
 ChatGPT環境ではrouting index §2.2によりLibrary Adapter / Space Adapterを独立して解決する。既存のlocatorと適格なbindingを維持し、UI名の変更だけで移行・複製しない。Page ID、file identity等の物理locatorは使用Adapterに従う。

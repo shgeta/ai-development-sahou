@@ -1,6 +1,6 @@
 # AI共通仕様 / GitHub / AISPEC セット README
 
-- Updated: 2026-11-24
+- Updated: 2026-11-25
 - Scope: AI/人間がGitHub repository上で仕様を読み、作業し、commit/CIまで安全に進めるための共通仕様セット
 - Legacy Library locator (existing binding only): `/AI共通仕様_GitHub_AISPEC/`
 
@@ -28,7 +28,7 @@
 - 共通仕様へ昇格させる場合は、project固有identifierを除去し、一般化したrule / patternだけを移す。
 - 「公開時に後で消す」運用を採用せず、常時public-safeであることを要求する。
 
-詳細なguardrailは `GITHUB_AI作業運用共通仕様_v1.18.md` の `Common specification public-safety rule` をauthorityとする。
+詳細なguardrailは `GITHUB_AI作業運用共通仕様_v1.19.md` の `Common specification public-safety rule` をauthorityとする。
 
 ### 1.2 AISPECのphysical model
 
@@ -54,7 +54,7 @@ session開始時は次の順で必要moduleを決める。
 
 | Trigger | Load |
 |---|---|
-| GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.18.md` |
+| GitHub repositoryで作業する | `GITHUB_AI作業運用共通仕様_v1.19.md` |
 | AISPECの意味変更・closure・RULE_IDを扱う | AISPEC v1.2 + GitHub運用 |
 | Project Localを使用する | `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` + Project Local index |
 | scheduled / unattended production taskを作成・再有効化する、またはstaging storeを選定・生成・検証・fallback利用する | `TASK_STAGING_STORE_AISPEC_v1.2.md` + `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` + product Adapter + project Adapter/certification if available |
@@ -80,13 +80,13 @@ Library AdapterとSpace Adapterは独立したproduct capability mappingであ�
 | 適用条件 | Adapter |
 |---|---|
 | 既存のLibrary path/file/folderまたは同等のLibrary file operationを使用する | `adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.3.md` (Library Adapter) |
-| Space / Page / Page attachmentとして扱う | `adapters/chatgpt/CHATGPT_SPACE_ADAPTER_共通仕様_v1.0.md` |
+| Space / Page / Page attachmentとして扱う | `adapters/chatgpt/CHATGPT_SPACE_ADAPTER_共通仕様_v1.1.md` |
 | どちらも適格で新規・未bindingのstoreが必要 | payload・scope・権限に適合する一方を選び、locatorと選択理由を記録する。Page-nativeな用途ではSpaceを候補とし、exact byte fileはbyte-preserving経路を優先する |
 | どちらも不適格 | 別の適格storeを解決する。なければunsupported / SAVE_FAILEDを明示する |
 
 Task Staging Storeでは先にvalid certified Project Local Adapterを確認し、失敗時はTask Staging Store AISPECの再検証・fallbackに従う。未certifiedの既定routeは既存の適格bindingを優先する。複数surfaceが同一backing resourceを指す場合、二重保存しない。既存bindingの未解決は自動migrationや新しい保存先の作成を許可しない。安全な一時fallbackを使う場合は既存bindingとは別であることを記録する。
 
-従来のPROJECT BOOTSTRAPがrouted current SAHOUとしてv1.17以前のGitHub運用specを参照する場合、現行v1.18を読む。明示的なexact revision/version pinは勝手に解除しない。旧版中のLibrary表記が単なるlogical role例なら、現行Adapter mappingを使用する。明示されたLibrary locatorは既存bindingとして扱い、Space locatorへの機械的置換をしない。
+従来のPROJECT BOOTSTRAPがrouted current SAHOUとしてv1.18以前のGitHub運用specを参照する場合、現行v1.19を読む。明示的なexact revision/version pinは勝手に解除しない。旧版中のLibrary表記が単なるlogical role例なら、現行Adapter mappingを使用する。明示されたLibrary locatorは既存bindingとして扱い、Space locatorへの機械的置換をしない。
 
 ## 3. 各ファイルのauthority
 
@@ -96,7 +96,7 @@ Task Staging Storeでは先にvalid certified Project Local Adapterを確認し�
 | `AI開発基盤抽象化共通仕様_v1.2.md` | product非依存platform role | logical capability model | Persistent Store / Task Staging Store / Repository / Tracker / Runner / Adapter role |
 | `TASK_STAGING_STORE_AISPEC_v1.2.md` | unattended task staging | certified staging優先 + environment default fallback + Adapter生成・scheduled acceptance・certification | route selection / default fallback / runtime eligibility / Test Task / cross-run persistence / invalidation / fail-closed |
 | `SAHOU_PROJECT_LOCAL_AISPEC_v1.1.md` | project固有SAHOU layer | Common override / project AISPEC / generated Adapter / certificationの配置・互換性 | embedded / sidecar / compatibility-first / migration boundary |
-| `GITHUB_AI作業運用共通仕様_v1.18.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
+| `GITHUB_AI作業運用共通仕様_v1.19.md` | GitHub作業運用 | repository作業手順 | Issue / checkpoint / commit / tests / CI / restartability |
 | `LOG_CORE_v1.0.md` | Log Core | durable log共通作法 | append-only / event identity / correction / secret exclusion / persistence safety |
 | `DECISION_JOURNAL_PLUGIN_v0.1.md` | Decision Journal | 決定ログのdomain plugin | decision chunks / causality / applied state / authority |
 | `DECISION_CONFLICT_RESOLUTION_v0.1.md` | Decision Conflict | 決定ログ統合時 | overlap / merge / unresolved conflict / no last-write-wins |
@@ -143,7 +143,7 @@ GitHub作業では原則として以下をauthorityとする。
 - 重いlocal commandは安全に分離・並行実行し、待ち時間中に依存しない作業を進める
 - pytestはすべての実行経路でproject固有の `PYTHONPATH` を明示し、canonical値をBOOTSTRAPへ記録する
 - projectの継続作業に必要な固定情報を追加・変更した場合、同じ変更単位でPROJECT BOOTSTRAPから到達可能にする
-- Persistent Project Storeへ保存するuser受領データはrepository / project単位の専用領域へ集約し、同一案件で再利用する
+- Persistent Project Storeへ保存するuser受領データはrepository / project単位の専用領域へ集約し、同一案件で再利用する。独立案件を収容するmiscの個別project rootはGitHub運用spec §4.5に従いrepository identity + stable project slugで分離する。新規project専用Spaceの表示名はSpace Adapter §5.1に従う
 - GitHub repository全体の再利用snapshotはlogical layout `/GitHubRepos/<owner>__<repo>/repo-snapshots/` にexact SHA/hash/manifest付きで保持し、artifactは原則30日、store内snapshotはcurrent + previous 1世代でrotationする。物理locatorはAdapterで解決する
 - project全体とactive Issueのcurrent focus / 順序 / blocker / nextはPersistent Project StoreのCurrent Stateで共有してよいが、Issueにできる大きさの作業はIssueを主としSTATEだけで抱え続けない
 
@@ -230,7 +230,7 @@ Bootstrapは最低限次を明示する。
 
 ```text
 Required SAHOU modules:
-- specs/github/GITHUB_AI作業運用共通仕様_v1.18.md
+- specs/github/GITHUB_AI作業運用共通仕様_v1.19.md
 
 Conditional modules:
 - production web update:
@@ -259,7 +259,7 @@ specs/
 ├── aispec/
 │   └── AISPEC_AI仕様記述共通仕様_v1.2.md
 ├── github/
-│   └── GITHUB_AI作業運用共通仕様_v1.18.md
+│   └── GITHUB_AI作業運用共通仕様_v1.19.md
 ├── log/
 │   └── LOG_CORE_v1.0.md
 ├── web/
@@ -291,6 +291,6 @@ Raw Material is semantically nested under Chemical by explicit dependency, not b
 Research / Adapter等はtask trigger時にroutingして読む。ChatGPTの保存Adapterは§2.2を参照する。
 
 - Library Adapter: `adapters/chatgpt/CHATGPT_ADAPTER_共通仕様_v1.3.md` (unchanged)
-- Space Adapter: `adapters/chatgpt/CHATGPT_SPACE_ADAPTER_共通仕様_v1.0.md` (independent)
+- Space Adapter: `adapters/chatgpt/CHATGPT_SPACE_ADAPTER_共通仕様_v1.1.md` (independent)
 
 このREADMEは入口・routing用であり、各仕様本文の意味を置き換えない。
